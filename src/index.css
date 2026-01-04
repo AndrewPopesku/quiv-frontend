@@ -1,0 +1,271 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+@layer base {
+  :root {
+    --background: 240 6% 6%;
+    --foreground: 240 5% 96%;
+
+    --card: 240 5% 8%;
+    --card-foreground: 240 5% 96%;
+
+    --popover: 240 5% 10%;
+    --popover-foreground: 240 5% 96%;
+
+    --primary: 40 95% 55%;
+    --primary-foreground: 240 6% 6%;
+
+    --secondary: 217 91% 60%;
+    --secondary-foreground: 240 5% 96%;
+
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 60%;
+
+    --accent: 240 4% 14%;
+    --accent-foreground: 240 5% 96%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 240 5% 96%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 240 5% 96%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 240 6% 6%;
+
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 40 95% 55%;
+
+    --radius: 0.75rem;
+
+    /* Custom Quiv tokens */
+    --glass: 240 5% 10% / 0.6;
+    --glass-border: 240 5% 20% / 0.3;
+    --cinema-gold: 40 95% 55%;
+    --cinema-gold-glow: 40 95% 55% / 0.3;
+    --electric-blue: 217 91% 60%;
+    --electric-blue-glow: 217 91% 60% / 0.3;
+
+    /* Gradients */
+    --gradient-gold: linear-gradient(135deg, hsl(40 95% 55%), hsl(30 95% 45%));
+    --gradient-blue: linear-gradient(135deg, hsl(217 91% 60%), hsl(230 91% 50%));
+    --gradient-dark: linear-gradient(180deg, hsl(240 6% 8%), hsl(240 6% 4%));
+    --gradient-glass: linear-gradient(135deg, hsl(240 5% 12% / 0.8), hsl(240 5% 8% / 0.6));
+
+    /* Shadows */
+    --shadow-glow-gold: 0 0 40px hsl(40 95% 55% / 0.2);
+    --shadow-glow-blue: 0 0 40px hsl(217 91% 60% / 0.2);
+    --shadow-elevated: 0 20px 40px -12px hsl(0 0% 0% / 0.5);
+    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
+
+    --sidebar-background: 240 6% 5%;
+    --sidebar-foreground: 240 5% 70%;
+    --sidebar-primary: 40 95% 55%;
+    --sidebar-primary-foreground: 240 6% 6%;
+    --sidebar-accent: 240 4% 12%;
+    --sidebar-accent-foreground: 240 5% 96%;
+    --sidebar-border: 240 4% 12%;
+    --sidebar-ring: 40 95% 55%;
+  }
+
+  .dark {
+    --background: 240 6% 6%;
+    --foreground: 240 5% 96%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+
+  /* Glassmorphism */
+  .glass {
+    @apply bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/[0.08];
+  }
+
+  .glass-card {
+    @apply bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-lg border border-white/[0.06] rounded-xl;
+  }
+
+  .glass-hover {
+    @apply transition-all duration-300 hover:bg-white/[0.08] hover:border-white/[0.12];
+  }
+
+  /* Bento grid items */
+  .bento-item {
+    @apply glass-card p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-[var(--shadow-elevated)];
+  }
+
+  /* Cinema gold glow effect */
+  .glow-gold {
+    box-shadow: var(--shadow-glow-gold);
+  }
+
+  .glow-blue {
+    box-shadow: var(--shadow-glow-blue);
+  }
+
+  /* Gradient text */
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-gold);
+  }
+
+  .text-gradient-blue {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-blue);
+  }
+
+  /* Progress bars */
+  .progress-gold {
+    background: var(--gradient-gold);
+  }
+
+  .progress-blue {
+    background: var(--gradient-blue);
+  }
+
+  /* Cinematic overlay */
+  .cinematic-overlay {
+    @apply absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent;
+  }
+
+  /* Scrollbar styling */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/20;
+  }
+}
+
+@layer utilities {
+
+  /* Animations */
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes glow {
+    from {
+      box-shadow: 0 0 20px hsl(var(--cinema-gold) / 0.2);
+    }
+
+    to {
+      box-shadow: 0 0 40px hsl(var(--cinema-gold) / 0.4);
+    }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+    background: linear-gradient(90deg,
+        hsl(var(--muted)) 0%,
+        hsl(var(--accent)) 50%,
+        hsl(var(--muted)) 100%);
+    background-size: 200% 100%;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /* Fade in animation */
+  .fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Scale in animation */
+  .scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Slide animations */
+  .slide-up {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
