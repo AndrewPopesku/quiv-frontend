@@ -17,7 +17,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter basename={"/"}>
+      <BrowserRouter basename={process.env.PUBLIC_PATH}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/writing" element={<Writing />} />
