@@ -1,10 +1,10 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { 
-  User, 
-  Settings, 
-  Award, 
-  Target, 
+import {
+  User,
+  Settings,
+  Award,
+  Target,
   Calendar,
   TrendingUp,
   BookOpen,
@@ -23,9 +23,7 @@ const achievements = [
 
 const stats = [
   { label: "Words Mastered", value: "247", icon: BookOpen, color: "text-primary" },
-  { label: "Movies Watched", value: "12", icon: Film, color: "text-secondary" },
   { label: "Current Streak", value: "5 days", icon: TrendingUp, color: "text-success" },
-  { label: "Total XP", value: "3,420", icon: Award, color: "text-warning" },
 ];
 
 export default function Profile() {
@@ -35,7 +33,7 @@ export default function Profile() {
       <div className="glass-card p-8 mb-8 relative overflow-hidden fade-in">
         {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10" />
-        
+
         <div className="relative flex flex-col md:flex-row items-center gap-6">
           {/* Avatar */}
           <div className="relative group">
@@ -52,9 +50,6 @@ export default function Profile() {
             <h1 className="text-2xl font-bold text-foreground mb-1">Alex Johnson</h1>
             <p className="text-muted-foreground mb-2">alex.johnson@email.com</p>
             <div className="flex items-center justify-center md:justify-start gap-3">
-              <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-sm font-medium">
-                B2 - Upper Intermediate
-              </span>
               <span className="text-sm text-muted-foreground">
                 Learning English
               </span>
@@ -131,55 +126,8 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Achievements */}
-        <div className="glass-card p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-              <Award className="w-5 h-5 text-primary" />
-              Achievements
-            </h3>
-            <span className="text-sm text-muted-foreground">3/5 unlocked</span>
-          </div>
-
-          <div className="space-y-3">
-            {achievements.map((achievement, index) => (
-              <div
-                key={achievement.id}
-                className={cn(
-                  "flex items-center gap-4 p-3 rounded-lg transition-colors",
-                  achievement.completed ? "bg-muted/50" : "bg-muted/20",
-                  "fade-in"
-                )}
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <span className="text-2xl">{achievement.icon}</span>
-                <div className="flex-1">
-                  <p className={cn(
-                    "font-medium",
-                    achievement.completed ? "text-foreground" : "text-muted-foreground"
-                  )}>
-                    {achievement.title}
-                  </p>
-                  <p className="text-xs text-muted-foreground">{achievement.description}</p>
-                  {!achievement.completed && achievement.progress !== undefined && achievement.progress > 0 && (
-                    <div className="mt-2 h-1 bg-muted rounded-full overflow-hidden">
-                      <div 
-                        className="h-full progress-gold rounded-full" 
-                        style={{ width: `${achievement.progress}%` }}
-                      />
-                    </div>
-                  )}
-                </div>
-                {achievement.completed && (
-                  <span className="text-success text-sm font-medium">✓</span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Activity Calendar */}
-        <div className="glass-card p-6 lg:col-span-2">
+        <div className="glass-card p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
               <Calendar className="w-5 h-5 text-primary" />
@@ -202,9 +150,9 @@ export default function Profile() {
                   className={cn(
                     "aspect-square rounded-md flex items-center justify-center text-xs transition-colors cursor-pointer hover:ring-2 hover:ring-primary/50",
                     activity > 0.7 ? "bg-primary text-primary-foreground" :
-                    activity > 0.4 ? "bg-primary/50 text-foreground" :
-                    activity > 0.1 ? "bg-primary/20 text-muted-foreground" :
-                    "bg-muted text-muted-foreground"
+                      activity > 0.4 ? "bg-primary/50 text-foreground" :
+                        activity > 0.1 ? "bg-primary/20 text-muted-foreground" :
+                          "bg-muted text-muted-foreground"
                   )}
                 >
                   {i + 1}

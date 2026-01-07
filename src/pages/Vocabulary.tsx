@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { 
-  Search, 
-  Filter, 
-  Volume2, 
-  BookmarkPlus, 
+import {
+  Search,
+  Filter,
+  Volume2,
+  BookmarkPlus,
   Play,
-  ChevronDown,
   Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -64,7 +63,6 @@ const movieClips = [
 
 export default function Vocabulary() {
   const [activeOccasion, setActiveOccasion] = useState("Casual");
-  const [expandedMeaning, setExpandedMeaning] = useState<number | null>(1);
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
@@ -107,90 +105,54 @@ export default function Vocabulary() {
             </Button>
           </div>
 
-          {/* Occasion Toggles */}
-          <div className="inline-flex p-1 bg-muted rounded-full">
-            {occasionTabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveOccasion(tab)}
-                className={cn(
-                  "px-6 py-2 rounded-full text-sm font-medium transition-all duration-200",
-                  activeOccasion === tab
-                    ? "bg-primary text-primary-foreground shadow-glow"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Polysemy Accordion */}
           <div className="lg:col-span-2 space-y-4">
             <h3 className="text-lg font-semibold text-foreground">Meanings</h3>
-            
+
             {polysemyMeanings.map((meaning, index) => (
               <div
                 key={meaning.id}
                 className={cn(
-                  "glass-card overflow-hidden transition-all duration-300",
+                  "glass-card overflow-hidden transition-all duration-300 p-4",
                   "fade-in"
                 )}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <button
-                  onClick={() =>
-                    setExpandedMeaning(
-                      expandedMeaning === meaning.id ? null : meaning.id
-                    )
-                  }
-                  className="w-full p-4 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold">
-                      {meaning.id}
+                <div className="flex items-start gap-4 mb-4">
+                  <span className="w-8 h-8 shrink-0 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold">
+                    {meaning.id}
+                  </span>
+                  <div>
+                    <span className="text-xs text-primary font-medium uppercase tracking-wider">
+                      {meaning.partOfSpeech}
                     </span>
-                    <div>
-                      <span className="text-xs text-primary font-medium uppercase tracking-wider">
-                        {meaning.partOfSpeech}
-                      </span>
-                      <p className="text-foreground font-medium">{meaning.definition}</p>
-                    </div>
+                    <p className="text-foreground font-medium text-lg">{meaning.definition}</p>
                   </div>
-                  <ChevronDown
-                    className={cn(
-                      "w-5 h-5 text-muted-foreground transition-transform",
-                      expandedMeaning === meaning.id && "rotate-180"
-                    )}
-                  />
-                </button>
+                </div>
 
-                {expandedMeaning === meaning.id && (
-                  <div className="px-4 pb-4 slide-up">
-                    <div className="ml-12 space-y-4">
-                      <div className="p-4 bg-muted/50 rounded-lg border-l-2 border-primary">
-                        <p className="text-foreground italic">"{meaning.example}"</p>
-                      </div>
-                      <div>
-                        <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                          Synonyms
+                <div className="ml-12 space-y-4">
+                  <div className="p-4 bg-muted/50 rounded-lg border-l-2 border-primary">
+                    <p className="text-foreground italic">"{meaning.example}"</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                      Synonyms
+                    </span>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {meaning.synonyms.map((syn) => (
+                        <span
+                          key={syn}
+                          className="px-3 py-1 bg-secondary/20 text-secondary rounded-full text-sm"
+                        >
+                          {syn}
                         </span>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {meaning.synonyms.map((syn) => (
-                            <span
-                              key={syn}
-                              className="px-3 py-1 bg-secondary/20 text-secondary rounded-full text-sm"
-                            >
-                              {syn}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             ))}
 
@@ -261,9 +223,6 @@ export default function Vocabulary() {
                   </div>
                   <div className="p-3">
                     <p className="text-sm font-medium text-foreground">{clip.movie}</p>
-                    <p className="text-xs text-muted-foreground italic mt-1">
-                      "{clip.context}"
-                    </p>
                   </div>
                 </div>
               ))}

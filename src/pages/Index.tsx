@@ -21,7 +21,7 @@ const Index = () => {
       </div>
 
       {/* Bento Grid Dashboard */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {/* Stats Row */}
         <StatCard
           title="Words Learned"
@@ -39,15 +39,15 @@ const Index = () => {
           variant="blue"
         />
         <StatCard
-          title="Time Studied"
-          value="4.5"
-          subtitle="hours"
+          title="Tests"
+          value=""
+          subtitle=""
           icon={Clock}
         />
         <StatCard
-          title="Level"
-          value="B2"
-          subtitle="Upper-Int."
+          title="Exercises"
+          value=""
+          subtitle=""
           icon={Award}
         />
 
@@ -62,9 +62,6 @@ const Index = () => {
 
         {/* Cinema Preview */}
         <CinemaPreview />
-
-        {/* Quick Actions */}
-        <QuickActions />
       </div>
     </Layout>
   );

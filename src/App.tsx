@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import Cinema from "./pages/Cinema";
 import Writing from "./pages/Writing";
 import Vocabulary from "./pages/Vocabulary";
 import Profile from "./pages/Profile";
@@ -18,10 +17,9 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter basename={process.env.PUBLIC_PATH}>
+      <BrowserRouter basename={"/"}>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/cinema" element={<Cinema />} />
           <Route path="/writing" element={<Writing />} />
           <Route path="/vocabulary" element={<Vocabulary />} />
           <Route path="/profile" element={<Profile />} />

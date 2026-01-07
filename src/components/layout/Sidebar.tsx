@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { 
-  Home, 
-  BookOpen, 
-  Film, 
-  PenTool, 
+import {
+  Home,
+  BookOpen,
+  Film,
+  PenTool,
   User,
   ChevronLeft,
   ChevronRight,
@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
   { icon: BookOpen, label: "Smart Chest", path: "/vocabulary" },
-  { icon: Film, label: "Cinema Mode", path: "/cinema" },
   { icon: PenTool, label: "Writing Lab", path: "/writing" },
   { icon: User, label: "Profile", path: "/profile" },
 ];
