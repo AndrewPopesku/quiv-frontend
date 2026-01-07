@@ -56,7 +56,7 @@ export function CinemaPreview() {
                 className="w-full h-full object-cover"
               />
               <div className="cinematic-overlay" />
-              
+
               {/* Match Score Badge */}
               <div
                 className={cn(
@@ -64,15 +64,15 @@ export function CinemaPreview() {
                   movie.matchScore >= 85
                     ? "bg-success text-success-foreground"
                     : movie.matchScore >= 70
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-warning text-warning-foreground"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-warning text-warning-foreground"
                 )}
               >
                 {movie.matchScore}%
               </div>
 
               {/* Play Button Overlay */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute inset-0 flex items-center justify-center transition-opacity">
                 <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center shadow-glow">
                   <Play className="w-5 h-5 text-primary-foreground fill-current ml-0.5" />
                 </div>

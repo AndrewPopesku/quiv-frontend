@@ -11,7 +11,7 @@ const recentWords = [
 
 export function RecentWords() {
   return (
-    <div className="bento-item">
+    <div className="bento-item col-span-2">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-foreground">Recent Words</h3>
         <Button variant="ghost" size="sm" className="text-primary">

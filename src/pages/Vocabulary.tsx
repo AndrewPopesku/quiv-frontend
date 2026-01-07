@@ -173,12 +173,12 @@ export default function Vocabulary() {
                     </p>
                   </div>
                 </div>
-                <div className="glass-card p-6 border-l-4 border-secondary">
+                <div className="glass-card p-6 border-l-4 border-success">
                   <h4 className="text-lg font-bold text-foreground mb-2">Ill</h4>
                   <p className="text-sm text-muted-foreground mb-4">
                     More formal. Preferred in professional or written contexts.
                   </p>
-                  <div className="p-3 bg-secondary/10 rounded-lg">
+                  <div className="p-3 bg-success/10 rounded-lg">
                     <p className="text-sm text-foreground italic">
                       "The patient has been ill for several weeks."
                     </p>
@@ -212,7 +212,7 @@ export default function Vocabulary() {
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute inset-0 flex items-center justify-center transition-opacity">
                       <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-glow">
                         <Play className="w-5 h-5 text-primary-foreground fill-current ml-0.5" />
                       </div>

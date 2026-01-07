@@ -63,23 +63,6 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        {stats.map((stat, index) => (
-          <div
-            key={stat.label}
-            className={cn(
-              "glass-card p-6 text-center fade-in"
-            )}
-            style={{ animationDelay: `${index * 50}ms` }}
-          >
-            <stat.icon className={cn("w-6 h-6 mx-auto mb-3", stat.color)} />
-            <p className="text-2xl font-bold text-foreground mb-1">{stat.value}</p>
-            <p className="text-xs text-muted-foreground">{stat.label}</p>
-          </div>
-        ))}
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Learning Goals */}
         <div className="glass-card p-6">
