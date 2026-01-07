@@ -57,7 +57,7 @@ export default function Vocabulary() {
               </div>
               <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5">
                 <BookmarkPlus className="w-5 h-5 text-primary" />
-                Save to Chest
+                Save to Dictionary
               </Button>
             </div>
           </div>

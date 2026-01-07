@@ -23,11 +23,27 @@ export interface Word {
 
 export enum ViewState {
     HOME = 'HOME',
-    CHEST = 'CHEST',
+    DICTIONARY = 'DICTIONARY',
     SAVED_WORDS = 'SAVED_WORDS',
     WRITING_LAB = 'WRITING_LAB',
     EXERCISE_SENTENCE = 'EXERCISE_SENTENCE',
     EXERCISE_FLASHCARDS = 'EXERCISE_FLASHCARDS',
     EXERCISE_CHOICE = 'EXERCISE_CHOICE',
     EXERCISE_MATCHING = 'EXERCISE_MATCHING'
+}
+
+export interface Suggestion {
+    original: string;
+    replacement: string;
+    type: 'Grammar' | 'Style' | 'Vocabulary';
+    reason: string;
+}
+
+export interface AnalysisResult {
+    score: number;
+    grammarStatus: 'Excellent' | 'Good' | 'Needs Work';
+    vocabularyStatus: 'Excellent' | 'Good' | 'Needs Work';
+    styleStatus: 'Excellent' | 'Good' | 'Needs Work';
+    suggestions: Suggestion[];
+    tips: string[];
 }

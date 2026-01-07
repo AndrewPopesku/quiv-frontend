@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
-  { icon: BookOpen, label: "Smart Chest", path: "/vocabulary" },
+  { icon: BookOpen, label: "Dictionary", path: "/vocabulary" },
   { icon: Library, label: "Saved Words", path: "/saved-words" },
   { icon: PenTool, label: "Writing Lab", path: "/writing" },
   { icon: User, label: "Profile", path: "/profile" },
@@ -76,11 +76,11 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Smart Chest Counter */}
+      {/* Smart Dictionary Counter */}
       {!collapsed && (
         <div className="mx-3 mb-4 p-4 glass-card">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">Smart Chest</span>
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">Dictionary</span>
             <BookOpen className="w-4 h-4 text-primary" />
           </div>
           <div className="flex items-baseline gap-2">
