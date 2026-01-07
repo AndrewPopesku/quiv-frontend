@@ -42,80 +42,82 @@ export default function Vocabulary() {
       </div>
 
       {activeWord ? (
-        <div className="space-y-6 fade-in" style={{ animationDelay: '100ms' }}>
-          {/* Word Header */}
-          <div className="glass-card p-8">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-4 mb-2">
-                  <h1 className="text-5xl font-bold text-gradient-gold">{activeWord.term}</h1>
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                    <Volume2 className="w-6 h-6" />
+        <div className="fade-in" style={{ animationDelay: '100ms' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            {/* Left Column: Header + Meanings */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Word Header */}
+              <div className="glass-card p-8">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-4 mb-2">
+                      <h1 className="text-5xl font-bold text-gradient-gold">{activeWord.term}</h1>
+                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                        <Volume2 className="w-6 h-6" />
+                      </Button>
+                    </div>
+                    <p className="text-xl text-muted-foreground font-serif italic">{activeWord.phonetic}</p>
+                  </div>
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                    <BookmarkPlus className="w-5 h-5" />
                   </Button>
                 </div>
-                <p className="text-xl text-muted-foreground font-serif italic">{activeWord.phonetic}</p>
               </div>
-              <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5">
-                <BookmarkPlus className="w-5 h-5 text-primary" />
-                Save to Dictionary
-              </Button>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Meanings Column */}
-            <div className="lg:col-span-2 space-y-4">
-              <h3 className="text-lg font-semibold text-foreground mb-4">Meanings</h3>
+              {/* Meanings */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-foreground">Meanings</h3>
 
-              {activeWord.definitions.map((meaning, index) => (
-                <div
-                  key={index}
-                  className="glass-card overflow-hidden p-6 hover:border-primary/20 transition-all group"
-                >
-                  <div className="flex items-start gap-4 mb-4">
-                    <span className="w-8 h-8 shrink-0 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold">
-                      {index + 1}
-                    </span>
-                    <div>
-                      <span className="text-xs text-primary font-bold uppercase tracking-widest">
-                        {meaning.partOfSpeech} {meaning.isInformal && '(Informal)'}
+                {activeWord.definitions.map((meaning, index) => (
+                  <div
+                    key={index}
+                    className="glass-card overflow-hidden p-6 hover:border-primary/20 transition-all group"
+                  >
+                    <div className="flex items-start gap-4 mb-4">
+                      <span className="w-8 h-8 shrink-0 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold">
+                        {index + 1}
                       </span>
-                      <p className="text-foreground font-medium text-xl mt-1 leading-relaxed">
-                        {meaning.text}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="ml-12 space-y-4">
-                    <div className="p-4 bg-muted/40 rounded-xl border-l-4 border-primary/50 italic font-serif text-muted-foreground">
-                      "{meaning.example}"
-                    </div>
-
-                    {meaning.synonyms.length > 0 && (
-                      <div className="space-y-2">
-                        <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
-                          Synonyms
+                      <div>
+                        <span className="text-xs text-primary font-bold uppercase tracking-widest">
+                          {meaning.partOfSpeech} {meaning.isInformal && '(Informal)'}
                         </span>
-                        <div className="flex flex-wrap gap-2">
-                          {meaning.synonyms.map((syn) => (
-                            <span
-                              key={syn}
-                              className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-semibold hover:bg-primary/20 transition-colors cursor-pointer"
-                            >
-                              {syn}
-                            </span>
-                          ))}
-                        </div>
+                        <p className="text-foreground font-medium text-xl mt-1 leading-relaxed">
+                          {meaning.text}
+                        </p>
                       </div>
-                    )}
+                    </div>
+
+                    <div className="ml-12 space-y-4">
+                      <div className="p-4 bg-muted/40 rounded-xl border-l-4 border-primary/50 italic font-serif text-muted-foreground">
+                        "{meaning.example}"
+                      </div>
+
+                      {meaning.synonyms.length > 0 && (
+                        <div className="space-y-2">
+                          <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
+                            Synonyms
+                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            {meaning.synonyms.map((syn) => (
+                              <span
+                                key={syn}
+                                className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-semibold hover:bg-primary/20 transition-colors cursor-pointer"
+                              >
+                                {syn}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            {/* Cinema Examples Column */}
+            {/* Right Column: Cinema */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
                 <Play className="w-5 h-5 text-primary" fill="currentColor" />
                 Seen in Cinema
               </h3>

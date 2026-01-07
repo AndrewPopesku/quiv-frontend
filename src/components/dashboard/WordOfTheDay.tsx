@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 
 export function WordOfTheDay() {
   return (
-    <div className="bento-item relative overflow-hidden col-span-2 row-span-2">
+    <div className="bento-item relative overflow-hidden col-span-2 row-span-2 h-full">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10" />
-      
+
       {/* Content */}
       <div className="relative h-full flex flex-col">
         <div className="flex items-center justify-between mb-6">

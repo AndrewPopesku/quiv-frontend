@@ -23,6 +23,11 @@ const Index = () => {
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+
+        {/* Word of the Day - Large Card */}
+        <WordOfTheDay />
+        {/* Streak Card */}
+        <StreakCard />
         <StatCard
           title="Words Learned"
           value="247"
@@ -37,18 +42,6 @@ const Index = () => {
           subtitle="words"
           icon={Target}
           variant="blue"
-        />
-        <StatCard
-          title="Tests"
-          value=""
-          subtitle=""
-          icon={Clock}
-        />
-        <StatCard
-          title="Exercises"
-          value=""
-          subtitle=""
-          icon={Award}
         />
       </div>
 
@@ -117,11 +110,8 @@ const Index = () => {
 
       {/* Remaining Dashboard items */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {/* Word of the Day - Large Card */}
-        <WordOfTheDay />
 
-        {/* Streak Card */}
-        <StreakCard />
+
 
         {/* Recent Words */}
         <RecentWords />

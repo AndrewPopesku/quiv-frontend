@@ -1,4 +1,4 @@
-import { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StatCardProps {
@@ -26,9 +26,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "bento-item relative overflow-hidden group",
-        variant === "gold" && "glow-gold",
-        variant === "blue" && "glow-blue",
+        "bento-item relative overflow-hidden group h-full flex flex-col justify-between",
         className
       )}
     >
@@ -36,7 +34,7 @@ export function StatCard({
       {variant !== "default" && (
         <div
           className={cn(
-            "absolute inset-0 opacity-10 transition-opacity group-hover:opacity-20",
+            "absolute inset-0 opacity-10",
             variant === "gold" && "bg-gradient-to-br from-primary to-transparent",
             variant === "blue" && "bg-gradient-to-br from-secondary to-transparent"
           )}
