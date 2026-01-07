@@ -1,48 +1,19 @@
 import { useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { 
-  Sparkles, 
-  AlertCircle, 
-  CheckCircle2, 
-  ChevronDown, 
+import {
+  Sparkles,
+  AlertCircle,
+  CheckCircle2,
+  ChevronDown,
   ChevronUp,
   RefreshCw,
   Copy,
   Wand2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface Suggestion {
-  id: number;
-  original: string;
-  correction: string;
-  explanation: string;
-  type: "grammar" | "style" | "word-choice";
-  startIndex: number;
-  endIndex: number;
-}
-
-const mockSuggestions: Suggestion[] = [
-  {
-    id: 1,
-    original: "more better",
-    correction: "better",
-    explanation: "'Better' is already a comparative form. Using 'more' before it is redundant and grammatically incorrect.",
-    type: "grammar",
-    startIndex: 25,
-    endIndex: 36,
-  },
-  {
-    id: 2,
-    original: "very unique",
-    correction: "unique",
-    explanation: "'Unique' means one of a kind and cannot be qualified. Something is either unique or it isn't.",
-    type: "style",
-    startIndex: 65,
-    endIndex: 76,
-  },
-];
+import { PageHeader } from "@/components/layout/PageHeader";
+import { MOCK_SUGGESTIONS, WRITING_TIPS } from "@/data/writing-data";
 
 export default function Writing() {
   const [text, setText] = useState(
@@ -58,35 +29,22 @@ export default function Writing() {
     return "text-destructive";
   };
 
-  const getScoreGradient = (score: number) => {
-    if (score >= 85) return "from-success to-success/50";
-    if (score >= 70) return "from-primary to-primary/50";
-    if (score >= 50) return "from-warning to-warning/50";
-    return "from-destructive to-destructive/50";
-  };
-
   return (
     <Layout>
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div className="fade-in">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-            Writing Lab
-          </h1>
-          <p className="text-muted-foreground">
-            Practice writing with AI-powered feedback
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2">
-            <RefreshCw className="w-4 h-4" /> Clear
-          </Button>
-          <Button variant="gold" className="gap-2">
-            <Wand2 className="w-4 h-4" /> Analyze
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Writing Lab"
+        description="Practice writing with AI-powered feedback"
+        actions={
+          <>
+            <Button variant="outline" className="gap-2">
+              <RefreshCw className="w-4 h-4" /> Clear
+            </Button>
+            <Button variant="gold" className="gap-2">
+              <Wand2 className="w-4 h-4" /> Analyze
+            </Button>
+          </>
+        }
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Text Input Area */}
@@ -98,7 +56,7 @@ export default function Writing() {
                 <Copy className="w-4 h-4" /> Copy
               </Button>
             </div>
-            
+
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -116,12 +74,12 @@ export default function Writing() {
           <div className="space-y-3">
             <h3 className="font-semibold text-foreground flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-warning" />
-              Suggestions ({mockSuggestions.length})
+              Suggestions ({MOCK_SUGGESTIONS.length})
             </h3>
 
-            {mockSuggestions.map((suggestion, index) => (
+            {MOCK_SUGGESTIONS.map((suggestion, index) => (
               <div
-                key={suggestion.id}
+                key={index}
                 className={cn(
                   "glass-card overflow-hidden transition-all duration-300",
                   "fade-in"
@@ -131,7 +89,7 @@ export default function Writing() {
                 <button
                   onClick={() =>
                     setExpandedSuggestion(
-                      expandedSuggestion === suggestion.id ? null : suggestion.id
+                      expandedSuggestion === index ? null : index
                     )
                   }
                   className="w-full p-4 flex items-start gap-4 text-left hover:bg-white/5 transition-colors"
@@ -139,9 +97,9 @@ export default function Writing() {
                   <div
                     className={cn(
                       "p-2 rounded-lg shrink-0",
-                      suggestion.type === "grammar" && "bg-destructive/20 text-destructive",
-                      suggestion.type === "style" && "bg-warning/20 text-warning",
-                      suggestion.type === "word-choice" && "bg-secondary/20 text-secondary"
+                      suggestion.type === "Grammar" && "bg-destructive/20 text-destructive",
+                      suggestion.type === "Style" && "bg-warning/20 text-warning",
+                      suggestion.type === "Vocabulary" && "bg-secondary/20 text-secondary"
                     )}
                   >
                     <AlertCircle className="w-4 h-4" />
@@ -154,7 +112,7 @@ export default function Writing() {
                       </span>
                       <span className="text-muted-foreground">→</span>
                       <span className="text-sm font-medium text-success">
-                        {suggestion.correction}
+                        {suggestion.replacement}
                       </span>
                     </div>
                     <span className="text-xs text-muted-foreground capitalize">
@@ -162,14 +120,14 @@ export default function Writing() {
                     </span>
                   </div>
 
-                  {expandedSuggestion === suggestion.id ? (
+                  {expandedSuggestion === index ? (
                     <ChevronUp className="w-5 h-5 text-muted-foreground shrink-0" />
                   ) : (
                     <ChevronDown className="w-5 h-5 text-muted-foreground shrink-0" />
                   )}
                 </button>
 
-                {expandedSuggestion === suggestion.id && (
+                {expandedSuggestion === index && (
                   <div className="px-4 pb-4 slide-up">
                     <div className="p-4 bg-muted/50 rounded-lg">
                       <h4 className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
@@ -177,7 +135,7 @@ export default function Writing() {
                         Explanation
                       </h4>
                       <p className="text-sm text-muted-foreground">
-                        {suggestion.explanation}
+                        {suggestion.reason}
                       </p>
                       <Button variant="gold" size="sm" className="mt-4">
                         Apply Fix
@@ -265,18 +223,12 @@ export default function Writing() {
           <div className="glass-card p-6">
             <h3 className="font-semibold text-foreground mb-4">Quick Tips</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                Avoid redundant modifiers like "very unique" or "more better"
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                Use active voice for more engaging writing
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                Vary your sentence length for better rhythm
-              </li>
+              {WRITING_TIPS.map((tip, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                  {tip}
+                </li>
+              ))}
             </ul>
           </div>
         </div>

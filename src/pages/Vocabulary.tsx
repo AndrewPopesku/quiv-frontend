@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { MOCK_WORDS } from "@/data/mock-words";
 import type { Word } from "@/types/vocabulary";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function Vocabulary() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -167,15 +168,11 @@ export default function Vocabulary() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-24 glass-card fade-in">
-          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-6">
-            <Search className="w-10 h-10 text-muted-foreground/20" />
-          </div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">No words found</h2>
-          <p className="text-muted-foreground max-w-xs text-center">
-            Try searching for another word or check your spelling.
-          </p>
-        </div>
+        <EmptyState
+          title="No words found"
+          description="Try searching for another word or check your spelling."
+          icon={Search}
+        />
       )}
     </Layout>
   );

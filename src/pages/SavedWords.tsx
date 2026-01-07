@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { MOCK_WORDS } from "@/data/mock-words";
 import { cn } from "@/lib/utils";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function SavedWords() {
     const [words, setWords] = useState(MOCK_WORDS);
@@ -34,23 +36,22 @@ export default function SavedWords() {
 
     return (
         <Layout>
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 fade-in">
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground mb-2">Saved Words</h1>
-                    <p className="text-muted-foreground">Manage your vocabulary collection and track progress.</p>
-                </div>
-
-                <div className="relative w-full md:w-auto">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <input
-                        type="text"
-                        placeholder="Search collection..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full md:w-72 bg-muted border border-border rounded-xl py-2.5 pl-10 pr-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-sm"
-                    />
-                </div>
-            </div>
+            <PageHeader
+                title="Saved Words"
+                description="Manage your vocabulary collection and track progress."
+                actions={
+                    <div className="relative w-full md:w-auto">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                        <input
+                            type="text"
+                            placeholder="Search collection..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full md:w-72 bg-muted border border-border rounded-xl py-2.5 pl-10 pr-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-sm"
+                        />
+                    </div>
+                }
+            />
 
             <div className="glass-card overflow-hidden fade-in" style={{ animationDelay: '100ms' }}>
                 <div className="grid grid-cols-12 gap-4 p-5 bg-muted/30 border-b border-border text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
@@ -123,13 +124,11 @@ export default function SavedWords() {
                     ))}
 
                     {filteredWords.length === 0 && (
-                        <div className="p-20 text-center">
-                            <div className="w-20 h-20 rounded-full bg-muted mx-auto flex items-center justify-center mb-6">
-                                <BookOpen size={40} className="text-muted-foreground/20" />
-                            </div>
-                            <h3 className="text-xl font-bold text-foreground mb-2">No words found</h3>
-                            <p className="text-muted-foreground">Try clearing your search or add some words to your collection.</p>
-                        </div>
+                        <EmptyState
+                            title="No words found"
+                            description="Try clearing your search or add some words to your collection."
+                            icon={BookOpen}
+                        />
                     )}
                 </div>
             </div>

@@ -3,28 +3,15 @@ import { Button } from "@/components/ui/button";
 import {
   User,
   Settings,
-  Award,
-  Target,
   Calendar,
-  TrendingUp,
-  BookOpen,
-  Film,
-  Edit3
+  Edit3,
+  TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const achievements = [
-  { id: 1, title: "First Steps", description: "Learn your first 10 words", completed: true, icon: "🎯" },
-  { id: 2, title: "Movie Buff", description: "Watch 5 movies in Cinema Mode", completed: true, icon: "🎬" },
-  { id: 3, title: "Week Warrior", description: "7-day learning streak", completed: true, icon: "🔥" },
-  { id: 4, title: "Vocabulary Master", description: "Learn 500 words", completed: false, progress: 49, icon: "📚" },
-  { id: 5, title: "Perfect Score", description: "100% on a quiz", completed: false, progress: 0, icon: "💯" },
-];
-
-const stats = [
-  { label: "Words Mastered", value: "247", icon: BookOpen, color: "text-primary" },
-  { label: "Current Streak", value: "5 days", icon: TrendingUp, color: "text-success" },
-];
+import { ACHIEVEMENTS } from "@/data/achievements";
+import { USER_STATS, DAILY_GOALS } from "@/data/user-stats";
+import { AchievementCard } from "@/components/profile/AchievementCard";
+import { GoalProgress } from "@/components/profile/GoalProgress";
 
 export default function Profile() {
   return (
@@ -68,44 +55,25 @@ export default function Profile() {
         <div className="glass-card p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-              <Target className="w-5 h-5 text-primary" />
-              Daily Goals
+              <TrendingUp className="w-5 h-5 text-primary" />
+              Progress
             </h3>
             <Button variant="ghost" size="sm" className="text-primary">
-              Edit
+              Details
             </Button>
           </div>
 
           <div className="space-y-6">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-muted-foreground">Words to learn</span>
-                <span className="text-sm font-medium text-foreground">8/10</span>
-              </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div className="h-full w-[80%] progress-gold rounded-full" />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-muted-foreground">Practice time</span>
-                <span className="text-sm font-medium text-foreground">25/30 min</span>
-              </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div className="h-full w-[83%] progress-blue rounded-full" />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-muted-foreground">Reviews completed</span>
-                <span className="text-sm font-medium text-foreground">15/20</span>
-              </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div className="h-full w-[75%] bg-success rounded-full" />
-              </div>
-            </div>
+            {DAILY_GOALS.map((goal) => (
+              <GoalProgress
+                key={goal.id}
+                label={goal.label}
+                current={goal.current}
+                total={goal.total}
+                unit={goal.unit}
+                variant={goal.variant}
+              />
+            ))}
           </div>
         </div>
 
