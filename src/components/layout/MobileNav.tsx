@@ -1,10 +1,11 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, BookOpen, Film, PenTool, User } from "lucide-react";
+import { Home, BookOpen, Film, PenTool, User, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
   { icon: BookOpen, label: "Dictionary", path: "/vocabulary" },
+  { icon: Library, label: "Saved", path: "/saved-words" },
   { icon: PenTool, label: "Write", path: "/writing" },
   { icon: User, label: "Profile", path: "/profile" },
 ];

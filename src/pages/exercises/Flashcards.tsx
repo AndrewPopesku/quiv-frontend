@@ -19,6 +19,8 @@ export default function Flashcards() {
     const words = MOCK_WORDS;
     const currentWord = words[currentIndex] || words[0];
 
+    if (!currentWord) return null;
+
     const nextCard = () => {
         setIsFlipped(false);
         setTimeout(() => {
