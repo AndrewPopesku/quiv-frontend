@@ -71,13 +71,6 @@ export function CinemaPreview() {
                 {movie.matchScore}%
               </div>
 
-              {/* Play Button Overlay */}
-              <div className="absolute inset-0 flex items-center justify-center transition-opacity">
-                <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center shadow-glow">
-                  <Play className="w-5 h-5 text-primary-foreground fill-current ml-0.5" />
-                </div>
-              </div>
-
               {/* Info Overlay */}
               <div className="absolute bottom-0 left-0 right-0 p-3">
                 <h4 className="text-sm font-semibold text-foreground truncate">
