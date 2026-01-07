@@ -8,13 +8,15 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Library
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
   { icon: BookOpen, label: "Smart Chest", path: "/vocabulary" },
+  { icon: Library, label: "Saved Words", path: "/saved-words" },
   { icon: PenTool, label: "Writing Lab", path: "/writing" },
   { icon: User, label: "Profile", path: "/profile" },
 ];

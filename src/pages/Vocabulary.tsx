@@ -3,67 +3,23 @@ import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import {
   Search,
-  Filter,
   Volume2,
   BookmarkPlus,
   Play,
   Sparkles
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-const occasionTabs = ["Formal", "Casual", "Slang"];
-
-const polysemyMeanings = [
-  {
-    id: 1,
-    partOfSpeech: "adjective",
-    definition: "Unwell or suffering from an illness",
-    example: "She's been sick for three days.",
-    synonyms: ["ill", "unwell", "ailing"],
-  },
-  {
-    id: 2,
-    partOfSpeech: "adjective (informal)",
-    definition: "Excellent or impressive; very good",
-    example: "That skateboard trick was sick!",
-    synonyms: ["awesome", "amazing", "cool"],
-  },
-  {
-    id: 3,
-    partOfSpeech: "adjective",
-    definition: "Feeling nauseous or queasy",
-    example: "The boat ride made me feel sick.",
-    synonyms: ["nauseous", "queasy"],
-  },
-];
-
-const movieClips = [
-  {
-    id: 1,
-    movie: "The Social Network",
-    thumbnail: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=200&fit=crop",
-    timestamp: "0:45:23",
-    context: "I'm sick of the accusations.",
-  },
-  {
-    id: 2,
-    movie: "Good Will Hunting",
-    thumbnail: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=200&fit=crop",
-    timestamp: "1:12:08",
-    context: "That's a sick move right there.",
-  },
-  {
-    id: 3,
-    movie: "The Breakfast Club",
-    thumbnail: "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?w=300&h=200&fit=crop",
-    timestamp: "0:32:15",
-    context: "I'm sick of being told what to do.",
-  },
-];
+import { MOCK_WORDS } from "@/data/mock-words";
+import type { Word } from "@/types/vocabulary";
 
 export default function Vocabulary() {
-  const [activeOccasion, setActiveOccasion] = useState("Casual");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Find active word based on search or fallback to first
+  const filteredWords = MOCK_WORDS.filter(w =>
+    w.term.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const activeWord: Word | undefined = filteredWords.length > 0 ? filteredWords[0] : undefined;
 
   return (
     <Layout>
@@ -76,7 +32,7 @@ export default function Vocabulary() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search for any word..."
-            className="w-full pl-12 pr-4 py-4 bg-muted border border-border rounded-2xl text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="w-full pl-12 pr-4 py-4 bg-muted border border-border rounded-2xl text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all focus:border-primary/30"
           />
           <Button variant="gold" className="absolute right-2 top-1/2 -translate-y-1/2">
             <Sparkles className="w-4 h-4 mr-2" />
@@ -85,151 +41,140 @@ export default function Vocabulary() {
         </div>
       </div>
 
-      {/* Word Result Dashboard */}
-      <div className="space-y-6">
-        {/* Word Header */}
-        <div className="glass-card p-8">
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <div className="flex items-center gap-4 mb-2">
-                <h1 className="text-5xl font-bold text-gradient-gold">Sick</h1>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                  <Volume2 className="w-6 h-6" />
-                </Button>
+      {activeWord ? (
+        <div className="space-y-6 fade-in" style={{ animationDelay: '100ms' }}>
+          {/* Word Header */}
+          <div className="glass-card p-8">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-4 mb-2">
+                  <h1 className="text-5xl font-bold text-gradient-gold">{activeWord.term}</h1>
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                    <Volume2 className="w-6 h-6" />
+                  </Button>
+                </div>
+                <p className="text-xl text-muted-foreground font-serif italic">{activeWord.phonetic}</p>
               </div>
-              <p className="text-xl text-muted-foreground">/sɪk/</p>
-            </div>
-            <Button variant="outline" className="gap-2">
-              <BookmarkPlus className="w-5 h-5" />
-              Save to Chest
-            </Button>
-          </div>
-
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Polysemy Accordion */}
-          <div className="lg:col-span-2 space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Meanings</h3>
-
-            {polysemyMeanings.map((meaning, index) => (
-              <div
-                key={meaning.id}
-                className={cn(
-                  "glass-card overflow-hidden transition-all duration-300 p-4",
-                  "fade-in"
-                )}
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="flex items-start gap-4 mb-4">
-                  <span className="w-8 h-8 shrink-0 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold">
-                    {meaning.id}
-                  </span>
-                  <div>
-                    <span className="text-xs text-primary font-medium uppercase tracking-wider">
-                      {meaning.partOfSpeech}
-                    </span>
-                    <p className="text-foreground font-medium text-lg">{meaning.definition}</p>
-                  </div>
-                </div>
-
-                <div className="ml-12 space-y-4">
-                  <div className="p-4 bg-muted/50 rounded-lg border-l-2 border-primary">
-                    <p className="text-foreground italic">"{meaning.example}"</p>
-                  </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                      Synonyms
-                    </span>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {meaning.synonyms.map((syn) => (
-                        <span
-                          key={syn}
-                          className="px-3 py-1 bg-secondary/20 text-secondary rounded-full text-sm"
-                        >
-                          {syn}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {/* Comparison Cards */}
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold text-foreground mb-4">
-                Usage Comparison
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="glass-card p-6 border-l-4 border-success">
-                  <h4 className="text-lg font-bold text-foreground mb-2">Sick</h4>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    More casual/informal. Common in everyday speech and informal writing.
-                  </p>
-                  <div className="p-3 bg-success/10 rounded-lg">
-                    <p className="text-sm text-foreground italic">
-                      "I'm feeling sick today, so I'll stay home."
-                    </p>
-                  </div>
-                </div>
-                <div className="glass-card p-6 border-l-4 border-success">
-                  <h4 className="text-lg font-bold text-foreground mb-2">Ill</h4>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    More formal. Preferred in professional or written contexts.
-                  </p>
-                  <div className="p-3 bg-success/10 rounded-lg">
-                    <p className="text-sm text-foreground italic">
-                      "The patient has been ill for several weeks."
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5">
+                <BookmarkPlus className="w-5 h-5 text-primary" />
+                Save to Chest
+              </Button>
             </div>
           </div>
 
-          {/* Seen in Cinema */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-              <Play className="w-5 h-5 text-primary" />
-              Seen in Cinema
-            </h3>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Meanings Column */}
+            <div className="lg:col-span-2 space-y-4">
+              <h3 className="text-lg font-semibold text-foreground mb-4">Meanings</h3>
 
-            <div className="space-y-3">
-              {movieClips.map((clip, index) => (
+              {activeWord.definitions.map((meaning, index) => (
                 <div
-                  key={clip.id}
-                  className={cn(
-                    "glass-card overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-102",
-                    "fade-in"
-                  )}
-                  style={{ animationDelay: `${index * 100}ms` }}
+                  key={index}
+                  className="glass-card overflow-hidden p-6 hover:border-primary/20 transition-all group"
                 >
-                  <div className="aspect-video relative">
-                    <img
-                      src={clip.thumbnail}
-                      alt={clip.movie}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
-                    <div className="absolute inset-0 flex items-center justify-center transition-opacity">
-                      <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-glow">
-                        <Play className="w-5 h-5 text-primary-foreground fill-current ml-0.5" />
-                      </div>
-                    </div>
-                    <span className="absolute bottom-2 right-2 px-2 py-1 bg-background/80 rounded text-xs text-foreground">
-                      {clip.timestamp}
+                  <div className="flex items-start gap-4 mb-4">
+                    <span className="w-8 h-8 shrink-0 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold">
+                      {index + 1}
                     </span>
+                    <div>
+                      <span className="text-xs text-primary font-bold uppercase tracking-widest">
+                        {meaning.partOfSpeech} {meaning.isInformal && '(Informal)'}
+                      </span>
+                      <p className="text-foreground font-medium text-xl mt-1 leading-relaxed">
+                        {meaning.text}
+                      </p>
+                    </div>
                   </div>
-                  <div className="p-3">
-                    <p className="text-sm font-medium text-foreground">{clip.movie}</p>
+
+                  <div className="ml-12 space-y-4">
+                    <div className="p-4 bg-muted/40 rounded-xl border-l-4 border-primary/50 italic font-serif text-muted-foreground">
+                      "{meaning.example}"
+                    </div>
+
+                    {meaning.synonyms.length > 0 && (
+                      <div className="space-y-2">
+                        <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
+                          Synonyms
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {meaning.synonyms.map((syn) => (
+                            <span
+                              key={syn}
+                              className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-semibold hover:bg-primary/20 transition-colors cursor-pointer"
+                            >
+                              {syn}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
+
+            {/* Cinema Examples Column */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
+                <Play className="w-5 h-5 text-primary" fill="currentColor" />
+                Seen in Cinema
+              </h3>
+
+              <div className="space-y-4">
+                {activeWord.cinemaExamples.length > 0 ? (
+                  activeWord.cinemaExamples.map((clip, index) => (
+                    <div
+                      key={index}
+                      className="glass-card overflow-hidden group cursor-pointer hover:border-primary/30 transition-all"
+                    >
+                      <div className="aspect-video relative overflow-hidden bg-muted">
+                        <img
+                          src={clip.imageUrl}
+                          alt={clip.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-80 group-hover:opacity-100"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110">
+                            <Play className="w-6 h-6 text-primary-foreground fill-current ml-1" />
+                          </div>
+                        </div>
+                        <span className="absolute bottom-2 right-2 px-2 py-1 bg-black/80 rounded font-mono text-[10px] text-white tracking-tighter">
+                          {clip.timestamp}
+                        </span>
+                      </div>
+                      <div className="p-4 bg-card/50">
+                        <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                          {clip.title}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="glass-card p-12 text-center border-dashed">
+                    <div className="w-16 h-16 rounded-full bg-muted mx-auto flex items-center justify-center mb-4">
+                      <Play className="w-8 h-8 text-muted-foreground/30" />
+                    </div>
+                    <p className="text-muted-foreground text-sm font-medium">
+                      No movie clips found for this word.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-24 glass-card fade-in">
+          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-6">
+            <Search className="w-10 h-10 text-muted-foreground/20" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground mb-2">No words found</h2>
+          <p className="text-muted-foreground max-w-xs text-center">
+            Try searching for another word or check your spelling.
+          </p>
+        </div>
+      )}
     </Layout>
   );
 }

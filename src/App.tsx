@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Writing from "./pages/Writing";
 import Vocabulary from "./pages/Vocabulary";
+import SavedWords from "./pages/SavedWords";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 // import "./index.css";
@@ -17,11 +18,12 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter basename={process.env.PUBLIC_PATH}>
+      <BrowserRouter basename={"/"}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/writing" element={<Writing />} />
           <Route path="/vocabulary" element={<Vocabulary />} />
+          <Route path="/saved-words" element={<SavedWords />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
