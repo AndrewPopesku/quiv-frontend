@@ -14,6 +14,18 @@ import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function Vocabulary() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [extraExamples, setExtraExamples] = useState<Record<string, string[]>>({});
+
+  const handleGenerateMore = (definitionIndex: number, term: string) => {
+    // Simulated generation - in a real app this would call an AI service
+    const key = `${term}-${definitionIndex}`;
+    const newExample = `She felt slightly ${term} and decided to stay home for the rest of the day.`;
+
+    setExtraExamples(prev => ({
+      ...prev,
+      [key]: [...(prev[key] || []), newExample]
+    }));
+  };
 
   // Find active word based on search or fallback to first
   const filteredWords = MOCK_WORDS.filter(w =>
@@ -89,8 +101,30 @@ export default function Vocabulary() {
                     </div>
 
                     <div className="ml-12 space-y-4">
-                      <div className="p-4 bg-muted/40 rounded-xl border-l-4 border-primary/50 italic font-serif text-muted-foreground">
-                        "{meaning.example}"
+                      <div className="space-y-3">
+                        <div className="p-4 bg-muted/40 rounded-xl border-l-4 border-primary/50 italic font-serif text-muted-foreground">
+                          "{meaning.example}"
+                        </div>
+
+                        {/* Generated Examples */}
+                        {extraExamples[`${activeWord.term}-${index}`]?.map((ex, i) => (
+                          <div
+                            key={i}
+                            className="p-4 bg-primary/5 border-l-4 border-primary/30 italic font-serif text-muted-foreground animate-in slide-in-from-left-2 duration-300"
+                          >
+                            "{ex}"
+                          </div>
+                        ))}
+
+                        <Button
+                          variant="gold"
+                          size="sm"
+                          className="mt-2 w-fit gap-2 h-9 px-4 rounded-xl shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+                          onClick={() => handleGenerateMore(index, activeWord.term)}
+                        >
+                          <Sparkles className="w-4 h-4" />
+                          Generate More
+                        </Button>
                       </div>
 
                       {meaning.synonyms.length > 0 && (
