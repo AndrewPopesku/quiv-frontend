@@ -114,6 +114,26 @@ export default function Vocabulary() {
                   </div>
                 ))}
               </div>
+              {/* Comparison Cards */}
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold text-foreground mb-4">
+                  Usage Comparison
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="glass-card p-6 border-l-4 border-success">
+                    <h4 className="text-lg font-bold text-foreground mb-2">Sick</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      More casual/informal. Common in everyday speech and informal writing.
+                    </p>
+                  </div>
+                  <div className="glass-card p-6 border-l-4 border-success">
+                    <h4 className="text-lg font-bold text-foreground mb-2">Ill</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      More formal. Preferred in professional or written contexts.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Right Column: Cinema */}
@@ -173,7 +193,8 @@ export default function Vocabulary() {
           description="Try searching for another word or check your spelling."
           icon={Search}
         />
-      )}
-    </Layout>
+      )
+      }
+    </Layout >
   );
 }

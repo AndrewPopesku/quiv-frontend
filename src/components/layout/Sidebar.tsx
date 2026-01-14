@@ -39,7 +39,7 @@ export function Sidebar() {
             <Sparkles className="w-5 h-5 text-primary-foreground" />
           </div>
           {!collapsed && (
-            <span className="text-xl font-bold text-gradient-gold">Quiv</span>
+            <span className="text-xl font-bold text-gradient-gold">Levise</span>
           )}
         </div>
       </div>
