@@ -39,11 +39,30 @@ export interface Suggestion {
     reason: string;
 }
 
+export type StatusLevel = 'Excellent' | 'Good' | 'Needs Work';
+
 export interface AnalysisResult {
     score: number;
-    grammarStatus: 'Excellent' | 'Good' | 'Needs Work';
-    vocabularyStatus: 'Excellent' | 'Good' | 'Needs Work';
-    styleStatus: 'Excellent' | 'Good' | 'Needs Work';
+    grammarStatus: StatusLevel;
+    vocabularyStatus: StatusLevel;
+    styleStatus: StatusLevel;
     suggestions: Suggestion[];
     tips: string[];
+    improvementTips: string[];
 }
+
+export interface TranslationVariation {
+    register: 'FORMAL' | 'CASUAL' | 'CREATIVE';
+    text: string;
+    description: string;
+}
+
+export interface TranslationResult {
+    sourceLanguage: string;
+    translationNotes: string[];
+    variations: TranslationVariation[];
+}
+
+export type WritingLabResult =
+    | { mode: 'analysis'; data: AnalysisResult }
+    | { mode: 'translation'; data: TranslationResult };
