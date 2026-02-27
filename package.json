@@ -7,7 +7,7 @@
     "dev": "bun --hot src/index.ts",
     "start": "NODE_ENV=production bun src/index.ts",
     "build": "bun run build.ts",
-    "generate-client": "openapi --input http://localhost:8000/api/v1/openapi.json --output ./src/api/ --client axios",
+    "generate-client": "openapi --input http://localhost:8000/api/doc/?format=json --output ./src/api/ --client axios",
     "format": "bun prettier . --write",
     "build:gh": "bun run build.ts --public-path /quiv-frontend/"
   },

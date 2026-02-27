@@ -1,6 +1,7 @@
 import { Layout } from "@/components/layout/Layout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import { WordOfTheDay } from "@/components/dashboard/WordOfTheDay";
 import { CinemaPreview } from "@/components/dashboard/CinemaPreview";
 import { StreakCard } from "@/components/dashboard/StreakCard";
@@ -11,12 +12,13 @@ import { ExerciseCard } from "@/components/dashboard/ExerciseCard";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   return (
     <Layout>
       {/* Header */}
       <div className="mb-8 fade-in">
         <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-          Welcome back, <span className="text-gradient-gold">Alex</span>
+          Welcome back, <span className="text-gradient-gold">{user?.username}</span>
         </h1>
         <p className="text-muted-foreground text-lg">
           Ready to expand your vocabulary today?
@@ -48,7 +50,7 @@ const Index = () => {
       </div>
 
       {/* Exercise Selection Area */}
-      <div className="mb-12 fade-in" style={{ animationDelay: '100ms' }}>
+      {/* <div className="mb-12 fade-in" style={{ animationDelay: '100ms' }}>
         <h2 className="text-2xl font-bold text-foreground mb-8 flex items-center gap-3">
           <Book className="text-primary w-6 h-6" /> Choose an Exercise
         </h2>
@@ -62,7 +64,7 @@ const Index = () => {
             />
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Remaining Dashboard items */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">

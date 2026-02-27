@@ -1,38 +1,52 @@
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import {
   Search,
   Volume2,
   BookmarkPlus,
-  Play,
-  Sparkles
+  Sparkles,
+  Loader2,
+  Check,
 } from "lucide-react";
-import { MOCK_WORDS } from "@/data/mock-words";
-import type { Word } from "@/types/vocabulary";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { DictionaryService } from "@/api";
+import { ApiError } from "@/api/core/ApiError";
+import type { Word } from "@/api/models/Word";
 
 export default function Vocabulary() {
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
-  const [extraExamples, setExtraExamples] = useState<Record<string, string[]>>({});
+  const [activeWord, setActiveWord] = useState<Word | null>(null);
+  const [saved, setSaved] = useState(false);
 
-  const handleGenerateMore = (definitionIndex: number, term: string) => {
-    // Simulated generation - in a real app this would call an AI service
-    const key = `${term}-${definitionIndex}`;
-    const newExample = `She felt slightly ${term} and decided to stay home for the rest of the day.`;
+  const translateMutation = useMutation({
+    mutationFn: (term: string) => DictionaryService.dictionaryWordsTranslateRetrieve(term),
+    onSuccess: (data: any) => {
+      setActiveWord(data);
+      setSaved(false);
+    },
+  });
 
-    setExtraExamples(prev => ({
-      ...prev,
-      [key]: [...(prev[key] || []), newExample]
-    }));
+  const saveMutation = useMutation({
+    mutationFn: (word: Word) => DictionaryService.dictionaryWordsCreate({ word } as any),
+    onSuccess: () => {
+      setSaved(true);
+      queryClient.invalidateQueries({ queryKey: ["saved-words"] });
+    },
+  });
+
+  const handleSearch = () => {
+    const term = searchQuery.trim();
+    if (term) {
+      translateMutation.mutate(term);
+    }
   };
 
-  // Find active word based on search or fallback to first
-  const filteredWords = MOCK_WORDS.filter(w =>
-    w.term.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const activeWord: Word | undefined = filteredWords.length > 0 ? filteredWords[0] : undefined;
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleSearch();
+  };
 
   return (
     <Layout>
@@ -44,17 +58,45 @@ export default function Vocabulary() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Search for any word..."
             className="w-full pl-12 pr-4 py-4 bg-muted border border-border rounded-2xl text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all focus:border-primary/30"
           />
-          <Button variant="gold" className="absolute right-2 top-1/2 -translate-y-1/2">
-            <Sparkles className="w-4 h-4 mr-2" />
+          <Button
+            variant="gold"
+            className="absolute right-2 top-1/2 -translate-y-1/2"
+            onClick={handleSearch}
+            disabled={translateMutation.isPending}
+          >
+            {translateMutation.isPending ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4 mr-2" />
+            )}
             Analyze
           </Button>
         </div>
       </div>
 
-      {activeWord ? (
+      {translateMutation.isPending && !activeWord && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      )}
+
+      {translateMutation.isError && (
+        <EmptyState
+          title="Translation failed"
+          description={
+            translateMutation.error instanceof ApiError && translateMutation.error.status === 400
+              ? "Please enter a word in the language you're learning."
+              : "Could not translate this word. Check spelling or try another term."
+          }
+          icon={Search}
+        />
+      )}
+
+      {activeWord && (
         <div className="fade-in" style={{ animationDelay: '100ms' }}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             {/* Left Column: Header + Meanings */}
@@ -71,8 +113,20 @@ export default function Vocabulary() {
                     </div>
                     <p className="text-xl text-muted-foreground font-serif italic">{activeWord.phonetic}</p>
                   </div>
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-                    <BookmarkPlus className="w-5 h-5" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={() => saveMutation.mutate(activeWord)}
+                    disabled={saveMutation.isPending || saved}
+                  >
+                    {saved ? (
+                      <Check className="w-5 h-5 text-green-500" />
+                    ) : saveMutation.isPending ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <BookmarkPlus className="w-5 h-5" />
+                    )}
                   </Button>
                 </div>
               </div>
@@ -81,7 +135,7 @@ export default function Vocabulary() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-foreground">Meanings</h3>
 
-                {activeWord.definitions.map((meaning, index) => (
+                {activeWord.definitions.map((def, index) => (
                   <div
                     key={index}
                     className="glass-card overflow-hidden p-6 hover:border-primary/20 transition-all group"
@@ -92,53 +146,36 @@ export default function Vocabulary() {
                       </span>
                       <div>
                         <span className="text-xs text-primary font-bold uppercase tracking-widest">
-                          {meaning.partOfSpeech} {meaning.isInformal && '(Informal)'}
+                          {def.part_of_speech}
                         </span>
                         <p className="text-foreground font-medium text-xl mt-1 leading-relaxed">
-                          {meaning.text}
+                          {def.translation}
                         </p>
+                        {def.details && (
+                          <p className="text-muted-foreground text-sm mt-1">{def.details}</p>
+                        )}
                       </div>
                     </div>
 
                     <div className="ml-12 space-y-4">
-                      <div className="space-y-3">
+                      {def.example && (
                         <div className="p-4 bg-muted/40 rounded-xl border-l-4 border-primary/50 italic font-serif text-muted-foreground">
-                          "{meaning.example}"
+                          "{def.example}"
                         </div>
+                      )}
 
-                        {/* Generated Examples */}
-                        {extraExamples[`${activeWord.term}-${index}`]?.map((ex, i) => (
-                          <div
-                            key={i}
-                            className="p-4 bg-primary/5 border-l-4 border-primary/30 italic font-serif text-muted-foreground animate-in slide-in-from-left-2 duration-300"
-                          >
-                            "{ex}"
-                          </div>
-                        ))}
-
-                        <Button
-                          variant="gold"
-                          size="sm"
-                          className="mt-2 w-fit gap-2 h-9 px-4 rounded-xl shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
-                          onClick={() => handleGenerateMore(index, activeWord.term)}
-                        >
-                          <Sparkles className="w-4 h-4" />
-                          Generate More
-                        </Button>
-                      </div>
-
-                      {meaning.synonyms.length > 0 && (
+                      {def.direct_synonyms && (
                         <div className="space-y-2">
                           <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
                             Synonyms
                           </span>
                           <div className="flex flex-wrap gap-2">
-                            {meaning.synonyms.map((syn) => (
+                            {def.direct_synonyms.split(",").map((syn) => (
                               <span
-                                key={syn}
+                                key={syn.trim()}
                                 className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-semibold hover:bg-primary/20 transition-colors cursor-pointer"
                               >
-                                {syn}
+                                {syn.trim()}
                               </span>
                             ))}
                           </div>
@@ -148,87 +185,37 @@ export default function Vocabulary() {
                   </div>
                 ))}
               </div>
-              {/* Comparison Cards */}
-              <div className="mt-8">
-                <h3 className="text-lg font-semibold text-foreground mb-4">
-                  Usage Comparison
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="glass-card p-6 border-l-4 border-success">
-                    <h4 className="text-lg font-bold text-foreground mb-2">Sick</h4>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      More casual/informal. Common in everyday speech and informal writing.
-                    </p>
-                  </div>
-                  <div className="glass-card p-6 border-l-4 border-success">
-                    <h4 className="text-lg font-bold text-foreground mb-2">Ill</h4>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      More formal. Preferred in professional or written contexts.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            {/* Right Column: Cinema */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                <Play className="w-5 h-5 text-primary" fill="currentColor" />
-                Seen in Cinema
-              </h3>
-
-              <div className="space-y-4">
-                {activeWord.cinemaExamples.length > 0 ? (
-                  activeWord.cinemaExamples.map((clip, index) => (
-                    <div
-                      key={index}
-                      className="glass-card overflow-hidden group cursor-pointer hover:border-primary/30 transition-all"
-                    >
-                      <div className="aspect-video relative overflow-hidden bg-muted">
-                        <img
-                          src={clip.imageUrl}
-                          alt={clip.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-80 group-hover:opacity-100"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110">
-                            <Play className="w-6 h-6 text-primary-foreground fill-current ml-1" />
-                          </div>
-                        </div>
-                        <span className="absolute bottom-2 right-2 px-2 py-1 bg-black/80 rounded font-mono text-[10px] text-white tracking-tighter">
-                          {clip.timestamp}
-                        </span>
-                      </div>
-                      <div className="p-4 bg-card/50">
-                        <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                          {clip.title}
+              {/* Nuanced Related Words */}
+              {activeWord.nuances && activeWord.nuances.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold text-foreground mb-4">
+                    Usage Comparison
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {activeWord.nuances.map((nuance, index) => (
+                      <div key={index} className="glass-card p-6 border-l-4 border-success">
+                        <h4 className="text-lg font-bold text-foreground mb-2">{nuance.related_term}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {nuance.difference_explanation}
                         </p>
                       </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="glass-card p-12 text-center border-dashed">
-                    <div className="w-16 h-16 rounded-full bg-muted mx-auto flex items-center justify-center mb-4">
-                      <Play className="w-8 h-8 text-muted-foreground/30" />
-                    </div>
-                    <p className="text-muted-foreground text-sm font-medium">
-                      No movie clips found for this word.
-                    </p>
+                    ))}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      ) : (
+      )}
+
+      {!activeWord && !translateMutation.isPending && !translateMutation.isError && (
         <EmptyState
-          title="No words found"
-          description="Try searching for another word or check your spelling."
+          title="Look up a word"
+          description="Type a word and click Analyze to get its translation and definitions."
           icon={Search}
         />
-      )
-      }
-    </Layout >
+      )}
+    </Layout>
   );
 }
