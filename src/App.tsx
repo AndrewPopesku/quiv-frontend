@@ -19,7 +19,7 @@ import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 // import "./index.css";
 
-OpenAPI.BASE = "http://localhost:8000";
+OpenAPI.BASE = process.env.API_BASE_URL || "http://localhost:8000";
 OpenAPI.TOKEN = async () => localStorage.getItem("access_token") ?? "";
 
 const queryClient = new QueryClient();

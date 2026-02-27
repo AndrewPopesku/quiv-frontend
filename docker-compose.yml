@@ -2,12 +2,12 @@ services:
   backend:
     build: ../levise-backend
     ports:
-      - "8000:8000"
+      - "8002:8000"
     env_file:
       - ../levise-backend/.env
     environment:
       - ALLOWED_HOSTS=localhost,127.0.0.1,backend
-      - CORS_ALLOWED_ORIGINS=http://localhost:3000
+      - CORS_ALLOWED_ORIGINS=http://localhost:3002
     volumes:
       - ../levise-backend:/app
       - backend-db:/app/db
@@ -17,7 +17,9 @@ services:
   frontend:
     build: .
     ports:
-      - "3000:3000"
+      - "3002:3000"
+    environment:
+      - API_BASE_URL=http://localhost:8002
     volumes:
       - .:/app
       - /app/node_modules
