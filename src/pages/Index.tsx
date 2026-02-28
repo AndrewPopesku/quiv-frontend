@@ -1,6 +1,7 @@
 import { Layout } from "@/components/layout/Layout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { WordOfTheDay } from "@/components/dashboard/WordOfTheDay";
 import { CinemaPreview } from "@/components/dashboard/CinemaPreview";
@@ -9,10 +10,15 @@ import { RecentWords } from "@/components/dashboard/RecentWords";
 import { BookOpen, Target, Book } from "lucide-react";
 import { EXERCISES } from "@/data/exercises";
 import { ExerciseCard } from "@/components/dashboard/ExerciseCard";
+import { ActivityService } from "@/api";
 
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { data: stats } = useQuery({
+    queryKey: ["daily-stats"],
+    queryFn: () => ActivityService.activityStatsRetrieve(),
+  });
   return (
     <Layout>
       {/* Header */}
@@ -34,15 +40,14 @@ const Index = () => {
         <StreakCard />
         <StatCard
           title="Words Learned"
-          value="247"
-          subtitle="this week"
+          value={String(stats?.words_learned ?? 0)}
+          subtitle="total"
           icon={BookOpen}
-          trend={{ value: "12% more than last week", positive: true }}
           variant="gold"
         />
         <StatCard
           title="Daily Goal"
-          value="8/10"
+          value={`${stats?.words_today ?? 0}/${stats?.daily_goal ?? 0}`}
           subtitle="words"
           icon={Target}
           variant="blue"
@@ -75,7 +80,7 @@ const Index = () => {
         <RecentWords />
 
         {/* Cinema Preview */}
-        <CinemaPreview />
+        {/* <CinemaPreview /> */}
       </div>
     </Layout>
   );

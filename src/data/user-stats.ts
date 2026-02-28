@@ -8,6 +8,6 @@ export const USER_STATS: UserStat[] = [
 
 export const DAILY_GOALS: Goal[] = [
     { id: "words", label: "Words to learn", current: 8, total: 10, unit: "words", variant: "gold" },
-    { id: "time", label: "Practice time", current: 25, total: 30, unit: "min", variant: "blue" },
-    { id: "reviews", label: "Reviews completed", current: 15, total: 20, unit: "", variant: "success" },
+    // { id: "time", label: "Practice time", current: 25, total: 30, unit: "min", variant: "blue" },
+    // { id: "reviews", label: "Reviews completed", current: 15, total: 20, unit: "", variant: "success" },
 ];

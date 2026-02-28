@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,8 @@ import type { Word } from "@/api/models/Word";
 
 export default function Vocabulary() {
   const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("term") ?? "");
   const [activeWord, setActiveWord] = useState<Word | null>(null);
   const [saved, setSaved] = useState(false);
 
@@ -34,8 +36,17 @@ export default function Vocabulary() {
     onSuccess: () => {
       setSaved(true);
       queryClient.invalidateQueries({ queryKey: ["saved-words"] });
+      queryClient.invalidateQueries({ queryKey: ["daily-stats"] });
     },
   });
+
+  useEffect(() => {
+    const term = searchParams.get("term");
+    if (term && !activeWord && !translateMutation.isPending) {
+      translateMutation.mutate(term);
+      setSearchParams({}, { replace: true });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = () => {
     const term = searchQuery.trim();

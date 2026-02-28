@@ -10,7 +10,7 @@ import {
     Globe,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { analyzeText, SAMPLE_ENGLISH_TEXT } from "@/data/writing-lab-data";
+import { DictionaryService } from "@/api";
 import { NaturalnessScore } from "@/components/writing/NaturalnessScore";
 import { SourceDetected } from "@/components/writing/SourceDetected";
 import { SuggestionCard } from "@/components/writing/SuggestionCard";
@@ -19,22 +19,57 @@ import { ImprovementTips } from "@/components/writing/ImprovementTips";
 import type { WritingLabResult } from "@/types/vocabulary";
 
 export default function Writing() {
-    const [text, setText] = useState(SAMPLE_ENGLISH_TEXT);
+    const [text, setText] = useState("");
     const [result, setResult] = useState<WritingLabResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    const handleAnalyze = () => {
+    const handleAnalyze = async () => {
         if (!text.trim()) return;
 
         setIsLoading(true);
-        // Simulate API delay
-        setTimeout(() => {
-            const analysisResult = analyzeText(text);
-            setResult(analysisResult);
+        try {
+            const response: any = await DictionaryService.dictionaryWordsRefineRetrieve(text);
+
+            if (response.mode === "analysis") {
+                const d = response.data;
+                setResult({
+                    mode: "analysis",
+                    data: {
+                        score: d.naturalness_score,
+                        grammarStatus: capitalize(d.grammar_rating),
+                        vocabularyStatus: capitalize(d.vocabulary_rating),
+                        styleStatus: capitalize(d.style_rating),
+                        suggestions: d.suggestions.map((s: any) => ({
+                            original: s.mistake,
+                            replacement: s.suggestion,
+                            type: capitalize(s.type),
+                            reason: s.explanation,
+                        })),
+                        tips: [],
+                        improvementTips: d.improvement_tips,
+                    },
+                });
+            } else {
+                const d = response.data;
+                setResult({
+                    mode: "translation",
+                    data: {
+                        sourceLanguage: d.source_language,
+                        translationNotes: d.translation_notes,
+                        variations: d.variations,
+                    },
+                });
+            }
+        } catch {
+            setResult(null);
+        } finally {
             setIsLoading(false);
-        }, 500);
+        }
     };
+
+    const capitalize = (s: string) =>
+        s.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 
     const handleClear = () => {
         setText("");

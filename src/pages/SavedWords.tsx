@@ -26,7 +26,10 @@ export default function SavedWords() {
 
     const deleteMutation = useMutation({
         mutationFn: (id: number) => DictionaryService.dictionaryWordsDestroy(id),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["saved-words"] }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["saved-words"] });
+            queryClient.invalidateQueries({ queryKey: ["daily-stats"] });
+        },
     });
 
     const resetMasteryMutation = useMutation({

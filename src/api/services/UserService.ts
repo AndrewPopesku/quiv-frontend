@@ -6,15 +6,26 @@ import type { PatchedUser } from '../models/PatchedUser';
 import type { TokenObtainPair } from '../models/TokenObtainPair';
 import type { TokenRefresh } from '../models/TokenRefresh';
 import type { User } from '../models/User';
+import type { UserRetrieve } from '../models/UserRetrieve';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class UserService {
     /**
-     * @returns User
+     * @returns void
      * @throws ApiError
      */
-    public static userMeRetrieve(): CancelablePromise<User> {
+    public static userDeleteDestroy(): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/user/delete/',
+        });
+    }
+    /**
+     * @returns UserRetrieve
+     * @throws ApiError
+     */
+    public static userMeRetrieve(): CancelablePromise<UserRetrieve> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/user/me/',
@@ -48,16 +59,6 @@ export class UserService {
             url: '/api/user/me/',
             body: requestBody,
             mediaType: 'application/json',
-        });
-    }
-    /**
-     * @returns void
-     * @throws ApiError
-     */
-    public static userMeDeleteDestroy(): CancelablePromise<void> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
-            url: '/api/user/me/delete/',
         });
     }
     /**

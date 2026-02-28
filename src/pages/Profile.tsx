@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,29 +11,53 @@ import {
   Loader2,
   Save,
   Trash2,
+  Globe,
+  Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DAILY_GOALS } from "@/data/user-stats";
 import { GoalProgress } from "@/components/profile/GoalProgress";
 import { useAuth } from "@/context/AuthContext";
-import { UserService } from "@/api";
+import { ActivityService, UserService } from "@/api";
 
 export default function Profile() {
   const { user, logout, login } = useAuth();
   const [showSettings, setShowSettings] = useState(false);
   const [username, setUsername] = useState(user?.username ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
+  const [timezone, setTimezone] = useState(user?.profile?.timezone ?? "");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const { data: stats } = useQuery({
+    queryKey: ["daily-stats"],
+    queryFn: () => ActivityService.activityStatsRetrieve(),
+  });
+
+  const now = new Date();
+  const monthName = now.toLocaleString("default", { month: "long" });
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  // getDay() returns 0=Sun, we want 0=Mon offset
+  const firstDayOffset = (new Date(year, month, 1).getDay() + 6) % 7;
+  const prevMonthDays = new Date(year, month, 0).getDate();
+  const totalCells = firstDayOffset + daysInMonth;
+  const trailingDays = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
   const [updateError, setUpdateError] = useState("");
   const [updateSuccess, setUpdateSuccess] = useState(false);
 
   const updateMutation = useMutation({
-    mutationFn: () =>
-      UserService.userMePartialUpdate({ username, email }),
-    onSuccess: (data) => {
+    mutationFn: () => {
+      const body: Record<string, any> = { username, email, profile: { timezone } };
+      if (newPassword) body.password = newPassword;
+      return UserService.userMePartialUpdate(body);
+    },
+    onSuccess: () => {
       setUpdateSuccess(true);
       setUpdateError("");
+      setNewPassword("");
+      setConfirmPassword("");
       setTimeout(() => setUpdateSuccess(false), 2000);
-      // Refresh auth context with updated token
       const token = localStorage.getItem("access_token");
       const refresh = localStorage.getItem("refresh_token");
       if (token && refresh) login(token, refresh);
@@ -51,6 +75,15 @@ export default function Profile() {
 
   const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
+    if (newPassword && newPassword !== confirmPassword) {
+      setUpdateError("Passwords do not match.");
+      return;
+    }
+    if (newPassword && newPassword.length < 8) {
+      setUpdateError("Password must be at least 8 characters.");
+      return;
+    }
+    setUpdateError("");
     updateMutation.mutate();
   };
 
@@ -143,6 +176,55 @@ export default function Profile() {
               />
             </div>
 
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5 text-muted-foreground" />
+                Timezone
+              </label>
+              <select
+                value={timezone}
+                onChange={(e) => setTimezone(e.target.value)}
+                className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-sm"
+              >
+                {Intl.supportedValuesOf("timeZone").map((tz) => (
+                  <option key={tz} value={tz}>
+                    {tz.replace(/_/g, " ")}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="border-t border-border pt-4 mt-4 space-y-4">
+              <h4 className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                Change Password
+              </h4>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Leave blank to keep current"
+                  className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-sm"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Repeat new password"
+                  className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-sm"
+                />
+              </div>
+            </div>
+
             {updateError && (
               <p className="text-sm text-destructive">{updateError}</p>
             )}
@@ -203,16 +285,13 @@ export default function Profile() {
           </div>
 
           <div className="space-y-6">
-            {DAILY_GOALS.map((goal) => (
-              <GoalProgress
-                key={goal.id}
-                label={goal.label}
-                current={goal.current}
-                total={goal.total}
-                unit={goal.unit}
-                variant={goal.variant}
-              />
-            ))}
+            <GoalProgress
+              label="Words to learn"
+              current={stats?.words_today ?? 0}
+              total={stats?.daily_goal ?? 0}
+              unit="words"
+              variant="gold"
+            />
           </div>
         </div>
 
@@ -224,7 +303,7 @@ export default function Profile() {
               Activity Calendar
             </h3>
             <span className="text-sm text-muted-foreground">
-              December 2025
+              {monthName} {year}
             </span>
           </div>
 
@@ -237,26 +316,43 @@ export default function Profile() {
                 {day}
               </div>
             ))}
-            {Array.from({ length: 31 }, (_, i) => {
-              const activity = Math.random();
+            {Array.from({ length: firstDayOffset }, (_, i) => (
+              <div
+                key={`prev-${i}`}
+                className="aspect-square rounded-md flex items-center justify-center text-xs bg-muted/40 text-muted-foreground/40"
+              >
+                {prevMonthDays - firstDayOffset + i + 1}
+              </div>
+            ))}
+            {Array.from({ length: daysInMonth }, (_, i) => {
+              const dayNum = i + 1;
+              const count = stats?.calendar?.[dayNum] ?? 0;
               return (
                 <div
-                  key={i}
+                  key={dayNum}
                   className={cn(
                     "aspect-square rounded-md flex items-center justify-center text-xs transition-colors cursor-pointer hover:ring-2 hover:ring-primary/50",
-                    activity > 0.7
+                    count >= 3
                       ? "bg-primary text-primary-foreground"
-                      : activity > 0.4
+                      : count === 2
                         ? "bg-primary/50 text-foreground"
-                        : activity > 0.1
+                        : count === 1
                           ? "bg-primary/20 text-muted-foreground"
                           : "bg-muted text-muted-foreground"
                   )}
                 >
-                  {i + 1}
+                  {dayNum}
                 </div>
               );
             })}
+            {Array.from({ length: trailingDays }, (_, i) => (
+              <div
+                key={`next-${i}`}
+                className="aspect-square rounded-md flex items-center justify-center text-xs bg-muted/40 text-muted-foreground/40"
+              >
+                {i + 1}
+              </div>
+            ))}
           </div>
         </div>
       </div>

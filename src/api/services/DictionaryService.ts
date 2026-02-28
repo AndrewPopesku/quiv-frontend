@@ -85,6 +85,22 @@ export class DictionaryService {
         });
     }
     /**
+     * @param text Text to be refined
+     * @returns UserWord
+     * @throws ApiError
+     */
+    public static dictionaryWordsRefineRetrieve(
+        text?: string,
+    ): CancelablePromise<UserWord> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/dictionary/words/refine/',
+            query: {
+                'text': text,
+            },
+        });
+    }
+    /**
      * @param term Term to be translated
      * @returns UserWord
      * @throws ApiError

@@ -77,7 +77,7 @@ export function Sidebar() {
       </nav>
 
       {/* Smart Dictionary Counter */}
-      {!collapsed && (
+      {/* {!collapsed && (
         <div className="mx-3 mb-4 p-4 glass-card">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs text-muted-foreground uppercase tracking-wider">Dictionary</span>
@@ -92,7 +92,7 @@ export function Sidebar() {
           </div>
           <p className="mt-2 text-xs text-muted-foreground">79% mastered</p>
         </div>
-      )}
+      )} */}
 
       {/* Collapse Toggle */}
       <button

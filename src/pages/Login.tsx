@@ -77,6 +77,7 @@ export default function Login() {
                 profile: {
                     user_language: Number(regUserLanguage),
                     target_language: Number(regTargetLanguage),
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 },
             } as any);
             // Auto-login after registration
