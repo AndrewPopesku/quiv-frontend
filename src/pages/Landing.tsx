@@ -3,11 +3,9 @@ import {
   Sparkles,
   BookOpen,
   PenTool,
-  LayoutDashboard,
   ChevronRight,
   CheckCircle2,
   Globe2,
-  Zap,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -93,9 +91,9 @@ const Hero = ({ onGetStarted }: { onGetStarted: () => void }) => (
             Start Learning
             <ChevronRight size={18} />
           </button>
-          <button className="w-full sm:w-auto bg-card hover:bg-accent border border-border text-foreground px-8 py-4 rounded-xl text-base font-medium transition-colors">
+          {/* <button className="w-full sm:w-auto bg-card hover:bg-accent border border-border text-foreground px-8 py-4 rounded-xl text-base font-medium transition-colors">
             View Demo
-          </button>
+          </button> */}
         </div>
       </motion.div>
     </div>
@@ -110,136 +108,13 @@ const AppMockup = () => (
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.7, delay: 0.2 }}
-        className="rounded-2xl border border-border bg-background overflow-hidden shadow-2xl shadow-primary/5 flex flex-col md:flex-row h-[600px]"
+        className="rounded-2xl border border-border overflow-hidden shadow-2xl shadow-primary/5"
       >
-        {/* Sidebar Mockup */}
-        <div className="w-64 border-r border-border bg-[#0a0a0a] p-4 hidden md:flex flex-col gap-6">
-          <div className="flex items-center gap-2 px-2 mb-4">
-            <div className="bg-primary text-primary-foreground p-1.5 rounded-lg">
-              <Sparkles size={20} className="fill-current" />
-            </div>
-            <span className="text-xl font-bold text-primary">Levise</span>
-          </div>
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-card text-primary font-medium">
-              <LayoutDashboard size={18} /> Home
-            </div>
-            <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:bg-card hover:text-foreground transition-colors">
-              <BookOpen size={18} /> Dictionary
-            </div>
-            <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:bg-card hover:text-foreground transition-colors">
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-              </svg>
-              Saved Words
-            </div>
-            <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:bg-card hover:text-foreground transition-colors">
-              <PenTool size={18} /> Writing Lab
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content Mockup */}
-        <div className="flex-1 bg-[#0f0f11] p-8 overflow-hidden flex flex-col gap-6">
-          <div className="flex justify-between items-end">
-            <div>
-              <h2 className="text-3xl font-bold mb-2">
-                Welcome back, <span className="text-primary">string</span>
-              </h2>
-              <p className="text-muted-foreground">
-                Ready to expand your vocabulary today?
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Word of the Day Card */}
-            <div className="bg-card border border-border rounded-xl p-6 flex flex-col">
-              <div className="flex justify-between items-start mb-4">
-                <span className="text-[10px] font-bold tracking-wider text-primary bg-primary/10 px-2 py-1 rounded uppercase">
-                  Word of the Day
-                </span>
-                <BookOpen size={16} className="text-muted-foreground" />
-              </div>
-              <h3 className="text-5xl font-bold text-primary mb-2">zoo</h3>
-              <p className="text-muted-foreground text-sm mb-4">/zu:/</p>
-              <p className="text-foreground mb-8">зоопарк</p>
-              <div className="mt-auto">
-                <button className="w-full bg-primary text-primary-foreground font-semibold py-3 rounded-lg flex items-center justify-center gap-2">
-                  Explore Full Definition <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-6">
-              {/* Streak Card */}
-              <div className="bg-card border border-border rounded-xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="bg-background p-2 rounded-lg text-muted-foreground">
-                    <Zap size={20} />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">No Streak Yet</h4>
-                    <p className="text-xs text-muted-foreground">
-                      Complete your daily goal to start
-                    </p>
-                  </div>
-                </div>
-                <div className="flex justify-between mt-6">
-                  {["M", "T", "W", "T", "F", "S", "S"].map((day, i) => (
-                    <div
-                      key={i}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
-                        i === 4
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-background text-muted-foreground"
-                      }`}
-                    >
-                      {i === 4 ? (
-                        <Zap size={14} className="fill-current" />
-                      ) : (
-                        day
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Stats Row */}
-              <div className="grid grid-cols-2 gap-6">
-                <div className="bg-card border border-border rounded-xl p-6">
-                  <p className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase mb-2">
-                    Words Learned
-                  </p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-primary">0</span>
-                    <span className="text-sm text-muted-foreground">total</span>
-                  </div>
-                </div>
-                <div className="bg-card border border-border rounded-xl p-6">
-                  <p className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase mb-2">
-                    Daily Goal
-                  </p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-secondary">
-                      0/2
-                    </span>
-                    <span className="text-sm text-muted-foreground">words</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <img
+          src="/images/dashboard.png"
+          alt="Levise dashboard showing word of the day, streak tracking, and vocabulary stats"
+          className="w-full h-auto"
+        />
       </motion.div>
     </div>
   </section>
@@ -360,122 +235,13 @@ const DictionaryShowcase = () => (
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="bg-[#0f0f11] border border-border rounded-2xl p-6 shadow-2xl relative"
+            className="rounded-2xl border border-border overflow-hidden shadow-2xl"
           >
-            {/* Search Bar */}
-            <div className="bg-card border border-border rounded-xl p-2 flex items-center gap-3 mb-6">
-              <div className="pl-3 text-muted-foreground">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.3-4.3" />
-                </svg>
-              </div>
-              <input
-                type="text"
-                value="word"
-                readOnly
-                className="bg-transparent border-none outline-none flex-1 text-foreground"
-              />
-              <button className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
-                <Sparkles size={16} className="fill-current" /> Analyze
-              </button>
-            </div>
-
-            {/* Word Header */}
-            <div className="bg-card border border-border rounded-xl p-6 mb-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-4xl font-bold text-primary">word</h3>
-                    <button className="text-muted-foreground hover:text-foreground">
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-                      </svg>
-                    </button>
-                  </div>
-                  <p className="text-muted-foreground font-mono text-sm">
-                    /w&#x25C;&#x259;rd/
-                  </p>
-                </div>
-                <button className="text-muted-foreground hover:text-foreground">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Meanings */}
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Meanings</h4>
-              <div className="bg-card border border-border rounded-xl p-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                    1
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold tracking-wider text-primary uppercase mb-2 block">
-                      Noun
-                    </span>
-                    <h5 className="text-xl font-semibold mb-2">word</h5>
-                    <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                      A single distinct meaningful element of speech or writing,
-                      used with others (or sometimes alone) to form a sentence
-                      and typically shown with a space on either side when
-                      written or printed.
-                    </p>
-                    <div className="bg-[#1a1a1c] rounded-lg p-4 border-l-2 border-primary mb-6">
-                      <p className="text-muted-foreground italic text-sm">
-                        "He didn't say a word during the entire meeting."
-                      </p>
-                    </div>
-
-                    <div>
-                      <span className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase mb-2 block">
-                        Synonyms
-                      </span>
-                      <div className="flex gap-2">
-                        <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20">
-                          term
-                        </span>
-                        <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20">
-                          expression
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <img
+              src="/images/dictionary.png"
+              alt="Levise dictionary showing word lookup with meanings, pronunciation, and synonyms"
+              className="w-full h-auto"
+            />
           </motion.div>
         </div>
       </div>
@@ -529,122 +295,13 @@ const SavedWordsShowcase = () => (
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="bg-background border border-border rounded-2xl p-6 shadow-2xl relative"
+            className="rounded-2xl border border-border overflow-hidden shadow-2xl"
           >
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h3 className="text-xl font-bold mb-1">Saved Words</h3>
-                <p className="text-sm text-muted-foreground">
-                  Manage your vocabulary collection and track progress.
-                </p>
-              </div>
-              <div className="bg-card border border-border rounded-lg px-3 py-2 flex items-center gap-2">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-muted-foreground"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.3-4.3" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search collection..."
-                  className="bg-transparent border-none outline-none text-sm w-32"
-                />
-              </div>
-            </div>
-
-            <div className="bg-card border border-border rounded-xl overflow-hidden">
-              <div className="grid grid-cols-12 gap-4 p-4 border-b border-border text-xs font-bold tracking-wider text-muted-foreground uppercase">
-                <div className="col-span-4">Word</div>
-                <div className="col-span-4">First Definition</div>
-                <div className="col-span-2">Mastery</div>
-                <div className="col-span-2 text-right">Actions</div>
-              </div>
-
-              {[
-                {
-                  word: "Ephemeral",
-                  pron: "/\u026A\u02C8fem.\u0259r.\u0259l/",
-                  def: "\u0415\u0444\u0435\u043C\u0435\u0440\u043D\u0438\u0439",
-                  mastery: "0%",
-                },
-                {
-                  word: "zoo",
-                  pron: "/zu:/",
-                  def: "\u0437\u043E\u043E\u043F\u0430\u0440\u043A",
-                  mastery: "0%",
-                },
-              ].map((item, i) => (
-                <div
-                  key={i}
-                  className="grid grid-cols-12 gap-4 p-4 border-b border-border last:border-0 items-center hover:bg-background transition-colors"
-                >
-                  <div className="col-span-4">
-                    <p className="font-bold text-base">{item.word}</p>
-                    <p className="text-xs text-muted-foreground font-mono">
-                      {item.pron}
-                    </p>
-                  </div>
-                  <div className="col-span-4 text-sm text-muted-foreground">
-                    {item.def}
-                  </div>
-                  <div className="col-span-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                        {item.mastery}
-                      </span>
-                    </div>
-                    <div className="h-1 w-full bg-background rounded-full mt-2 overflow-hidden">
-                      <div className="h-full bg-primary w-0" />
-                    </div>
-                  </div>
-                  <div className="col-span-2 flex justify-end gap-3 text-muted-foreground">
-                    <button className="hover:text-foreground">
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                        <path d="M3 3v5h5" />
-                      </svg>
-                    </button>
-                    <button className="hover:text-destructive">
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M3 6h18" />
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                      </svg>
-                    </button>
-                    <button className="hover:text-foreground">
-                      <ChevronRight size={16} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <img
+              src="/images/saved-words.png"
+              alt="Levise saved words page with vocabulary collection and mastery tracking"
+              className="w-full h-auto"
+            />
           </motion.div>
         </div>
       </div>
@@ -699,85 +356,13 @@ const WritingLabShowcase = () => (
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="bg-[#0f0f11] border border-border rounded-2xl p-6 shadow-2xl relative"
+            className="rounded-2xl border border-border overflow-hidden shadow-2xl"
           >
-            <h3 className="text-xl font-bold mb-2">Writing Lab</h3>
-            <p className="text-sm text-muted-foreground mb-6">
-              Smart writing assistance. Enter text in English to improve it, or
-              any other language to translate it.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-card border border-border rounded-xl p-4 flex flex-col h-64">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-semibold">Your Text</span>
-                  <button className="text-xs text-muted-foreground flex items-center gap-1 hover:text-foreground">
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect
-                        width="14"
-                        height="14"
-                        x="8"
-                        y="8"
-                        rx="2"
-                        ry="2"
-                      />
-                      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-                    </svg>{" "}
-                    Copy
-                  </button>
-                </div>
-                <div className="bg-[#1a1a1c] rounded-lg p-3 flex-1 mb-3 text-sm text-foreground">
-                  go to beach
-                </div>
-                <div className="flex justify-between text-xs text-muted-foreground mt-auto">
-                  <span>3 words</span>
-                  <span>11 characters</span>
-                </div>
-              </div>
-
-              <div className="bg-card border border-border rounded-xl p-4 flex flex-col items-center justify-center text-center h-64">
-                <div className="text-muted-foreground mb-4">
-                  <Sparkles size={32} />
-                </div>
-                <h4 className="font-semibold mb-2">Ready to Analyze</h4>
-                <p className="text-xs text-muted-foreground max-w-[200px]">
-                  Enter your text and click "Run Analysis" to get AI-powered
-                  feedback on your writing.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 mt-4">
-              <button className="px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-card transition-colors flex items-center gap-2">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                  <path d="M3 3v5h5" />
-                </svg>
-                Clear
-              </button>
-              <button className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2">
-                <Sparkles size={16} className="fill-current" />
-                Run Analysis
-              </button>
-            </div>
+            <img
+              src="/images/writing-lab.png"
+              alt="Levise Writing Lab with AI-powered grammar corrections, vocabulary suggestions, and translation"
+              className="w-full h-auto"
+            />
           </motion.div>
         </div>
       </div>
@@ -835,7 +420,7 @@ export default function Landing() {
   const handleGetStarted = () => navigate("/login?register=true");
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 selection:text-primary [&_*]:outline-none">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 selection:text-primary">
       <Navbar onLogin={handleLogin} onGetStarted={handleGetStarted} />
       <main>
         <Hero onGetStarted={handleGetStarted} />

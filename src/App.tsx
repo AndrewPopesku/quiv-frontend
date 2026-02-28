@@ -51,6 +51,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Index />} />
+      <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="/writing" element={<Writing />} />
       <Route path="/vocabulary" element={<Vocabulary />} />
       <Route path="/saved-words" element={<SavedWords />} />

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Sparkles, LogIn, UserPlus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { UserService, ActivityService } from "@/api";
 import type { Language } from "@/api/models/Language";
 
-type View = "welcome" | "login" | "register";
+type View = "login" | "register";
 
 const inputClass =
     "w-full bg-muted border border-border rounded-xl py-2.5 px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-sm";
@@ -15,7 +16,8 @@ const selectClass =
 
 export default function Login() {
     const { login } = useAuth();
-    const [view, setView] = useState<View>("welcome");
+    const [searchParams] = useSearchParams();
+    const [view, setView] = useState<View>(searchParams.get("register") ? "register" : "login");
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [languages, setLanguages] = useState<Language[]>([]);
@@ -93,6 +95,11 @@ export default function Login() {
         }
     };
 
+    const switchView = (newView: View) => {
+        setView(newView);
+        setError("");
+    };
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             {/* Header with logo */}
@@ -108,23 +115,6 @@ export default function Login() {
             {/* Center content */}
             <div className="flex-1 flex items-center justify-center px-4">
                 <div className="text-center space-y-6 w-full max-w-sm">
-                    {view === "welcome" && (
-                        <>
-                            <h1 className="text-2xl font-bold text-foreground">Welcome to Levise</h1>
-                            <p className="text-muted-foreground">Sign in to access your vocabulary and start learning.</p>
-                            <div className="flex flex-col gap-3">
-                                <Button onClick={() => setView("login")} className="gap-2" size="lg">
-                                    <LogIn size={18} />
-                                    Login
-                                </Button>
-                                <Button onClick={() => setView("register")} variant="outline" className="gap-2" size="lg">
-                                    <UserPlus size={18} />
-                                    Create Account
-                                </Button>
-                            </div>
-                        </>
-                    )}
-
                     {view === "login" && (
                         <form onSubmit={handleLogin} className="space-y-4 text-left">
                             <h1 className="text-2xl font-bold text-foreground text-center">Sign In</h1>
@@ -141,9 +131,12 @@ export default function Login() {
                                 {isLoading ? <Loader2 size={18} className="animate-spin" /> : <LogIn size={18} />}
                                 Sign In
                             </Button>
-                            <button type="button" onClick={() => { setView("welcome"); setError(""); }} className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                Back
-                            </button>
+                            <p className="text-sm text-muted-foreground text-center">
+                                Don't have an account?{" "}
+                                <button type="button" onClick={() => switchView("register")} className="text-primary hover:underline font-medium">
+                                    Create one
+                                </button>
+                            </p>
                         </form>
                     )}
 
@@ -189,9 +182,12 @@ export default function Login() {
                                 {isLoading ? <Loader2 size={18} className="animate-spin" /> : <UserPlus size={18} />}
                                 Create Account
                             </Button>
-                            <button type="button" onClick={() => { setView("welcome"); setError(""); }} className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                Back
-                            </button>
+                            <p className="text-sm text-muted-foreground text-center">
+                                Already have an account?{" "}
+                                <button type="button" onClick={() => switchView("login")} className="text-primary hover:underline font-medium">
+                                    Sign in
+                                </button>
+                            </p>
                         </form>
                     )}
                 </div>
