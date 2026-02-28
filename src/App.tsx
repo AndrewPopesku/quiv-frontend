@@ -21,8 +21,7 @@ import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 // import "./index.css";
 
-declare const process: { env: Record<string, string | undefined> };
-OpenAPI.BASE = (typeof process !== "undefined" && process.env?.API_BASE_URL) || "http://localhost:8000";
+OpenAPI.BASE = "";
 OpenAPI.TOKEN = async () => localStorage.getItem("access_token") ?? "";
 
 const queryClient = new QueryClient();
