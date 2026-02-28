@@ -34,9 +34,9 @@ const Navbar = ({ onLogin, onGetStarted }: { onLogin: () => void; onGetStarted: 
         >
           How it Works
         </a>
-        <a href="#pricing" className="hover:text-foreground transition-colors">
+        {/* <a href="#pricing" className="hover:text-foreground transition-colors">
           Pricing
-        </a>
+        </a> */}
       </div>
       <div className="flex items-center gap-4">
         <button
