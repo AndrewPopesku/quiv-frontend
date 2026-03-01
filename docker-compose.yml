@@ -1,4 +1,10 @@
 services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
   backend:
     build:
       context: ../levise-backend
@@ -10,8 +16,43 @@ services:
     environment:
       - ALLOWED_HOSTS=localhost,127.0.0.1,backend
       - CORS_ALLOWED_ORIGINS=http://46.224.53.105:3002
+      - CELERY_BROKER_URL=redis://redis:6379/
+      - CELERY_RESULT_BACKEND=redis://redis:6379/
     command: >
-      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+      sh -c "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --workers 3 levise_service.wsgi:application"
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  celery-worker:
+    build:
+      context: ../levise-backend
+      dockerfile: Dockerfile
+    env_file:
+      - ../levise-backend/.env
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/
+      - CELERY_RESULT_BACKEND=redis://redis:6379/
+    command: celery -A levise_service worker --loglevel=info
+    depends_on:
+      - redis
+      - backend
+    restart: unless-stopped
+
+  celery-beat:
+    build:
+      context: ../levise-backend
+      dockerfile: Dockerfile
+    env_file:
+      - ../levise-backend/.env
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/
+      - CELERY_RESULT_BACKEND=redis://redis:6379/
+    command: celery -A levise_service beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    depends_on:
+      - redis
+      - backend
+    restart: unless-stopped
 
   frontend:
     build:
@@ -20,6 +61,8 @@ services:
     ports:
       - "3002:3000"
     environment:
-      - API_BASE_URL=http://localhost:8002
+      - NODE_ENV=production
+      - API_BASE_URL=http://backend:8000
     depends_on:
       - backend
+    restart: unless-stopped
