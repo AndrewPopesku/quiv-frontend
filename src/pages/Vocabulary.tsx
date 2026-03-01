@@ -10,6 +10,7 @@ import {
   Sparkles,
   Loader2,
   Check,
+  X,
 } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { DictionaryService } from "@/api";
@@ -71,8 +72,17 @@ export default function Vocabulary() {
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search for any word..."
-            className="w-full pl-12 pr-4 py-4 bg-muted border border-border rounded-2xl text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all focus:border-primary/30"
+            className="w-full pl-12 pr-20 md:pr-48 py-4 bg-muted border border-border rounded-2xl text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all focus:border-primary/30"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-14 md:right-40 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
           <Button
             variant="gold"
             className="absolute right-2 top-1/2 -translate-y-1/2"
@@ -80,11 +90,11 @@ export default function Vocabulary() {
             disabled={translateMutation.isPending}
           >
             {translateMutation.isPending ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <Sparkles className="w-4 h-4 mr-2" />
+              <Sparkles className="w-4 h-4" />
             )}
-            Analyze
+            <span className="hidden md:inline">Analyze</span>
           </Button>
         </div>
       </div>
@@ -114,31 +124,31 @@ export default function Vocabulary() {
             <div className="lg:col-span-2 space-y-6">
               {/* Word Header */}
               <div className="glass-card p-8">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-4 mb-2">
-                      <h1 className="text-5xl font-bold text-gradient-gold">{activeWord.term}</h1>
-                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                        <Volume2 className="w-6 h-6" />
-                      </Button>
-                    </div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h1 className="text-3xl md:text-5xl font-bold text-gradient-gold break-words">{activeWord.term}</h1>
                     <p className="text-xl text-muted-foreground font-serif italic">{activeWord.phonetic}</p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-foreground"
-                    onClick={() => saveMutation.mutate(activeWord)}
-                    disabled={saveMutation.isPending || saved}
-                  >
-                    {saved ? (
-                      <Check className="w-5 h-5 text-green-500" />
-                    ) : saveMutation.isPending ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <BookmarkPlus className="w-5 h-5" />
-                    )}
-                  </Button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                      <Volume2 className="w-6 h-6" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-foreground"
+                      onClick={() => saveMutation.mutate(activeWord)}
+                      disabled={saveMutation.isPending || saved}
+                    >
+                      {saved ? (
+                        <Check className="w-5 h-5 text-green-500" />
+                      ) : saveMutation.isPending ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <BookmarkPlus className="w-5 h-5" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
 

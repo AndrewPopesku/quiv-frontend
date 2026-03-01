@@ -41,7 +41,7 @@ const Navbar = ({ onLogin, onGetStarted }: { onLogin: () => void; onGetStarted: 
       <div className="flex items-center gap-4">
         <button
           onClick={onLogin}
-          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           Log in
         </button>
