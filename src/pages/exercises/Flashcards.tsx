@@ -7,19 +7,44 @@ import {
     Rotate3d,
     Check,
     X,
-    Layers
+    Layers,
+    Loader2
 } from "lucide-react";
-import { MOCK_WORDS } from "@/data/mock-words";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { DictionaryService } from "@/api";
+
+interface ExerciseWord {
+    id: string;
+    term: string;
+    phonetic: string;
+    definitions: Array<{ text: string; example: string }>;
+}
 
 export default function Flashcards() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
 
-    const words = MOCK_WORDS;
-    const currentWord = words[currentIndex] || words[0];
+    const { data: words = [], isLoading } = useQuery<ExerciseWord[]>({
+        queryKey: ["exercise-words"],
+        queryFn: async () => {
+            const userWords = await DictionaryService.dictionaryUserWordsList();
+            const wordsWithDefs = await Promise.all(
+                userWords.map(async (uw) => {
+                    const def = await DictionaryService.dictionaryWordsDefinitionsLookupRetrieve(uw.word.id);
+                    return {
+                        id: String(uw.word.id),
+                        term: uw.word.term,
+                        phonetic: uw.word.phonetic,
+                        definitions: [{ text: def.translation ?? "", example: def.example ?? "" }],
+                    };
+                })
+            );
+            return wordsWithDefs;
+        },
+    });
 
-    if (!currentWord) return null;
+    const currentWord = words[currentIndex] || words[0];
 
     const nextCard = () => {
         setIsFlipped(false);
@@ -46,78 +71,94 @@ export default function Flashcards() {
                     <p className="text-muted-foreground">Tap the card to flip. Test your memory.</p>
                 </div>
 
-                <div
-                    className="h-[450px] perspective-1000 relative group cursor-pointer"
-                    onClick={() => setIsFlipped(!isFlipped)}
-                >
-                    <div className={cn(
-                        "w-full h-full duration-500 preserve-3d absolute transition-transform",
-                        isFlipped ? "rotate-y-180" : ""
-                    )}>
+                {isLoading && (
+                    <div className="flex items-center justify-center py-20">
+                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    </div>
+                )}
 
-                        {/* Front */}
-                        <div className="backface-hidden absolute w-full h-full glass-card border-primary/20 flex flex-col items-center justify-center p-8 shadow-2xl">
-                            <span className="text-primary/50 text-xs tracking-[0.2em] uppercase absolute top-10 font-bold">Term</span>
-                            <h2 className="text-6xl font-black text-gradient-gold mb-6">{currentWord?.term}</h2>
-                            <p className="text-muted-foreground font-serif italic text-2xl">{currentWord?.phonetic}</p>
-                            <div className="absolute bottom-10 text-muted-foreground flex items-center gap-3 text-sm animate-pulse bg-muted/50 px-4 py-2 rounded-full">
-                                <Rotate3d size={18} /> Click to flip
+                {!isLoading && words.length === 0 && (
+                    <div className="text-center py-20 text-muted-foreground">
+                        No saved words yet. Add some words to your collection first.
+                    </div>
+                )}
+
+                {!isLoading && currentWord && (
+                    <>
+                        <div
+                            className="h-[450px] perspective-1000 relative group cursor-pointer"
+                            onClick={() => setIsFlipped(!isFlipped)}
+                        >
+                            <div className={cn(
+                                "w-full h-full duration-500 preserve-3d absolute transition-transform",
+                                isFlipped ? "rotate-y-180" : ""
+                            )}>
+
+                                {/* Front */}
+                                <div className="backface-hidden absolute w-full h-full glass-card border-primary/20 flex flex-col items-center justify-center p-8 shadow-2xl">
+                                    <span className="text-primary/50 text-xs tracking-[0.2em] uppercase absolute top-10 font-bold">Term</span>
+                                    <h2 className="text-6xl font-black text-gradient-gold mb-6">{currentWord?.term}</h2>
+                                    <p className="text-muted-foreground font-serif italic text-2xl">{currentWord?.phonetic}</p>
+                                    <div className="absolute bottom-10 text-muted-foreground flex items-center gap-3 text-sm animate-pulse bg-muted/50 px-4 py-2 rounded-full">
+                                        <Rotate3d size={18} /> Click to flip
+                                    </div>
+                                </div>
+
+                                {/* Back */}
+                                <div className="rotate-y-180 backface-hidden absolute w-full h-full glass-card border-primary/40 bg-muted/30 flex flex-col items-center justify-center p-12 text-center shadow-2xl">
+                                    <span className="text-primary/50 text-xs tracking-[0.2em] uppercase absolute top-10 font-bold">Definition</span>
+                                    <p className="text-foreground text-3xl leading-snug mb-8 font-medium">{currentWord.definitions?.[0]?.text}</p>
+                                    <div className="p-6 bg-muted/50 rounded-2xl border border-border/50">
+                                        <p className="text-muted-foreground italic font-serif text-xl leading-relaxed">
+                                            "{currentWord?.definitions[0]?.example}"
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Back */}
-                        <div className="rotate-y-180 backface-hidden absolute w-full h-full glass-card border-primary/40 bg-muted/30 flex flex-col items-center justify-center p-12 text-center shadow-2xl">
-                            <span className="text-primary/50 text-xs tracking-[0.2em] uppercase absolute top-10 font-bold">Definition</span>
-                            <p className="text-foreground text-3xl leading-snug mb-8 font-medium">{currentWord.definitions[0]?.text}</p>
-                            <div className="p-6 bg-muted/50 rounded-2xl border border-border/50">
-                                <p className="text-muted-foreground italic font-serif text-xl leading-relaxed">
-                                    "{currentWord?.definitions[0]?.example}"
-                                </p>
+                        <div className="flex items-center justify-between mt-12 gap-6">
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={(e) => { e.stopPropagation(); prevCard(); }}
+                                className="w-14 h-14 rounded-full border-border hover:bg-muted transition-all"
+                            >
+                                <ChevronLeft size={28} />
+                            </Button>
+
+                            <div className="flex gap-4 flex-1">
+                                <Button
+                                    onClick={(e) => { e.stopPropagation(); nextCard(); }}
+                                    className="flex-1 h-14 rounded-2xl bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20 font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg"
+                                >
+                                    <X size={20} /> Forgot
+                                </Button>
+                                <Button
+                                    onClick={(e) => { e.stopPropagation(); nextCard(); }}
+                                    className="flex-1 h-14 rounded-2xl bg-green-500/10 text-green-500 hover:bg-green-500/20 border border-green-500/20 font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg"
+                                >
+                                    <Check size={20} /> Got it
+                                </Button>
+                            </div>
+
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={(e) => { e.stopPropagation(); nextCard(); }}
+                                className="w-14 h-14 rounded-full border-border hover:bg-muted transition-all"
+                            >
+                                <ChevronRight size={28} />
+                            </Button>
+                        </div>
+
+                        <div className="text-center mt-8">
+                            <div className="inline-block px-4 py-1 bg-muted rounded-full text-muted-foreground font-bold text-xs">
+                                Card {currentIndex + 1} of {words.length}
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div className="flex items-center justify-between mt-12 gap-6">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={(e) => { e.stopPropagation(); prevCard(); }}
-                        className="w-14 h-14 rounded-full border-border hover:bg-muted transition-all"
-                    >
-                        <ChevronLeft size={28} />
-                    </Button>
-
-                    <div className="flex gap-4 flex-1">
-                        <Button
-                            onClick={(e) => { e.stopPropagation(); nextCard(); }}
-                            className="flex-1 h-14 rounded-2xl bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20 font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg"
-                        >
-                            <X size={20} /> Forgot
-                        </Button>
-                        <Button
-                            onClick={(e) => { e.stopPropagation(); nextCard(); }}
-                            className="flex-1 h-14 rounded-2xl bg-green-500/10 text-green-500 hover:bg-green-500/20 border border-green-500/20 font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg"
-                        >
-                            <Check size={20} /> Got it
-                        </Button>
-                    </div>
-
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={(e) => { e.stopPropagation(); nextCard(); }}
-                        className="w-14 h-14 rounded-full border-border hover:bg-muted transition-all"
-                    >
-                        <ChevronRight size={28} />
-                    </Button>
-                </div>
-
-                <div className="text-center mt-8">
-                    <div className="inline-block px-4 py-1 bg-muted rounded-full text-muted-foreground font-bold text-xs">
-                        Card {currentIndex + 1} of {words.length}
-                    </div>
-                </div>
+                    </>
+                )}
             </div>
         </Layout>
     );

@@ -1,22 +1,48 @@
 import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, ArrowRight, ListChecks, Flame } from "lucide-react";
-import { MOCK_WORDS } from "@/data/mock-words";
+import { CheckCircle, XCircle, ArrowRight, ListChecks, Flame, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Word } from "@/types/vocabulary";
+import { useQuery } from "@tanstack/react-query";
+import { DictionaryService } from "@/api";
+
+interface ExerciseWord {
+    id: string;
+    term: string;
+    phonetic: string;
+    definitions: Array<{ text: string }>;
+}
 
 export default function MultipleChoice() {
-    const [currentWord, setCurrentWord] = useState<Word | null>(null);
-    const [options, setOptions] = useState<Word[]>([]);
+    const [currentWord, setCurrentWord] = useState<ExerciseWord | null>(null);
+    const [options, setOptions] = useState<ExerciseWord[]>([]);
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
     const [streak, setStreak] = useState(0);
 
-    const setupRound = () => {
-        const target = MOCK_WORDS[Math.floor(Math.random() * MOCK_WORDS.length)] as Word | undefined;
-        if (!target) return;
+    const { data: words = [], isLoading } = useQuery<ExerciseWord[]>({
+        queryKey: ["exercise-words"],
+        queryFn: async () => {
+            const userWords = await DictionaryService.dictionaryUserWordsList();
+            const wordsWithDefs = await Promise.all(
+                userWords.map(async (uw) => {
+                    const def = await DictionaryService.dictionaryWordsDefinitionsLookupRetrieve(uw.word.id);
+                    return {
+                        id: String(uw.word.id),
+                        term: uw.word.term,
+                        phonetic: uw.word.phonetic,
+                        definitions: [{ text: def.translation ?? "" }],
+                    };
+                })
+            );
+            return wordsWithDefs;
+        },
+    });
 
-        const distractors = MOCK_WORDS
+    const setupRound = (wordList: ExerciseWord[]) => {
+        if (wordList.length === 0) return;
+        const target = wordList[Math.floor(Math.random() * wordList.length)];
+
+        const distractors = wordList
             .filter(w => w.id !== target.id)
             .sort(() => 0.5 - Math.random())
             .slice(0, 3);
@@ -29,8 +55,10 @@ export default function MultipleChoice() {
     };
 
     useEffect(() => {
-        setupRound();
-    }, []);
+        if (words.length > 0 && !currentWord) {
+            setupRound(words);
+        }
+    }, [words]);
 
     const handleSelect = (id: string) => {
         if (selectedOption || !currentWord) return;
@@ -44,6 +72,26 @@ export default function MultipleChoice() {
             setStreak(0);
         }
     };
+
+    if (isLoading) {
+        return (
+            <Layout>
+                <div className="flex items-center justify-center py-20">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+            </Layout>
+        );
+    }
+
+    if (words.length < 4) {
+        return (
+            <Layout>
+                <div className="text-center py-20 text-muted-foreground">
+                    You need at least 4 saved words to play. Add more words to your collection.
+                </div>
+            </Layout>
+        );
+    }
 
     if (!currentWord) return null;
 
@@ -68,7 +116,7 @@ export default function MultipleChoice() {
                     <div className="p-12 text-center bg-gradient-to-b from-muted/50 to-transparent">
                         <span className="text-primary/50 text-[10px] tracking-[0.3em] uppercase mb-4 block font-black">Definition</span>
                         <p className="text-3xl text-foreground font-medium leading-relaxed italic font-serif">
-                            "{currentWord.definitions[0]?.text}"
+                            "{currentWord.definitions?.[0]?.text}"
                         </p>
                     </div>
                 </div>
@@ -104,7 +152,7 @@ export default function MultipleChoice() {
                 {selectedOption && (
                     <div className="mt-12 flex justify-center animate-in fade-in slide-in-from-bottom-6 duration-500">
                         <Button
-                            onClick={setupRound}
+                            onClick={() => setupRound(words)}
                             size="lg"
                             className="h-16 px-12 rounded-2xl font-black text-xl bg-foreground text-background hover:scale-105 transition-transform shadow-2xl flex items-center gap-4"
                         >

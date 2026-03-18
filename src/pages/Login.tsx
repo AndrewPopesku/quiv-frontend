@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Sparkles, LogIn, UserPlus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
-import { UserService, ActivityService } from "@/api";
+import { UserService, DictionaryService } from "@/api";
 import type { Language } from "@/api/models/Language";
 
 type View = "login" | "register";
@@ -35,7 +35,7 @@ export default function Login() {
     const [regTargetLanguage, setRegTargetLanguage] = useState("");
 
     useEffect(() => {
-        ActivityService.activityLanguagesList().then(setLanguages).catch(() => {});
+        DictionaryService.dictionaryLanguagesList().then(setLanguages).catch(() => {});
     }, []);
 
     const handleLogin = async (e: React.FormEvent) => {

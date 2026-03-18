@@ -2,10 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type UserWord = {
+export type WordBasic = {
     readonly id: number;
-    word: number;
-    readonly mastery: number;
-    readonly created_at: string;
+    term: string;
+    phonetic: string;
 };
 

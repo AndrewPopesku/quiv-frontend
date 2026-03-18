@@ -20,8 +20,17 @@ export function WordOfTheDay() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const word = await DictionaryService.dictionaryWordsTranslateRetrieve(data!.word.term);
-      await DictionaryService.dictionaryWordsCreate({ word } as any);
+      const result = await DictionaryService.dictionaryUserWordsCreate({ word: data!.word.id } as any) as any;
+      const userWordId = result.id;
+      const defsResponse = await DictionaryService.dictionaryWordsDefinitionsLookupRetrieve(data!.word.id) as any;
+      const definitions = defsResponse.definitions ?? defsResponse;
+      if (Array.isArray(definitions)) {
+        await Promise.all(
+          definitions.map((d: any) =>
+            DictionaryService.dictionaryUserWordsLearnedDefinitionsCreate(userWordId, { definition: d.id } as any)
+          )
+        );
+      }
     },
     onSuccess: () => {
       setSaved(true);

@@ -15,29 +15,80 @@ import {
 import { EmptyState } from "@/components/ui/EmptyState";
 import { DictionaryService } from "@/api";
 import { ApiError } from "@/api/core/ApiError";
-import type { Word } from "@/api/models/Word";
+import type { ExtendedWord, WordLookupResponse } from "@/types/vocabulary";
+import { parseExamples } from "@/lib/vocabulary";
 
 export default function Vocabulary() {
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("term") ?? "");
-  const [activeWord, setActiveWord] = useState<Word | null>(null);
-  const [saved, setSaved] = useState(false);
+  const [activeWord, setActiveWord] = useState<ExtendedWord | null>(null);
+  const [savedDefinitionIds, setSavedDefinitionIds] = useState<Set<number>>(new Set());
+  const [userWordId, setUserWordId] = useState<number | null>(null);
 
   const translateMutation = useMutation({
-    mutationFn: (term: string) => DictionaryService.dictionaryWordsTranslateRetrieve(term),
-    onSuccess: (data: any) => {
+    mutationFn: async (term: string) => {
+      const response = await DictionaryService.dictionaryWordsLookupRetrieve(term) as any;
+      const lookupData = response as WordLookupResponse;
+      const wordBasic = lookupData.word ?? response;
+      const [defsResponse, nuancesResponse] = await Promise.all([
+        DictionaryService.dictionaryWordsDefinitionsLookupRetrieve(wordBasic.id) as any,
+        DictionaryService.dictionaryWordsNuancesLookupRetrieve(wordBasic.id) as any,
+      ]);
+      const definitions = defsResponse.definitions ?? defsResponse;
+      const nuances = nuancesResponse.nuances ?? nuancesResponse;
+      return {
+        ...wordBasic,
+        definitions,
+        nuances,
+        is_saved: lookupData.is_saved ?? false,
+        user_word_id: lookupData.user_word_id ?? null,
+        saved_definitions: lookupData.saved_definitions ?? [],
+      } as ExtendedWord;
+    },
+    onSuccess: (data) => {
       setActiveWord(data);
-      setSaved(false);
+      setSavedDefinitionIds(new Set(data.saved_definitions));
+      setUserWordId(data.user_word_id);
     },
   });
 
-  const saveMutation = useMutation({
-    mutationFn: (word: Word) => DictionaryService.dictionaryWordsCreate({ word } as any),
-    onSuccess: () => {
-      setSaved(true);
+  const ensureWordSaved = async (word: ExtendedWord): Promise<number> => {
+    if (userWordId) return userWordId;
+    const result = await DictionaryService.dictionaryUserWordsCreate({ word: word.id } as any) as any;
+    const newId = result.id;
+    setUserWordId(newId);
+    queryClient.invalidateQueries({ queryKey: ["saved-words"] });
+    queryClient.invalidateQueries({ queryKey: ["daily-stats"] });
+    return newId;
+  };
+
+  const saveAllMutation = useMutation({
+    mutationFn: async (word: ExtendedWord) => {
+      const uwId = await ensureWordSaved(word);
+      const unsavedDefs = word.definitions.filter(d => !savedDefinitionIds.has(d.id));
+      await Promise.all(
+        unsavedDefs.map(d =>
+          DictionaryService.dictionaryUserWordsLearnedDefinitionsCreate(uwId, { definition: d.id } as any)
+        )
+      );
+      return word.definitions.map(d => d.id);
+    },
+    onSuccess: (allIds) => {
+      setSavedDefinitionIds(new Set(allIds));
       queryClient.invalidateQueries({ queryKey: ["saved-words"] });
-      queryClient.invalidateQueries({ queryKey: ["daily-stats"] });
+    },
+  });
+
+  const saveDefinitionMutation = useMutation({
+    mutationFn: async ({ word, definitionId }: { word: ExtendedWord; definitionId: number }) => {
+      const uwId = await ensureWordSaved(word);
+      await DictionaryService.dictionaryUserWordsLearnedDefinitionsCreate(uwId, { definition: definitionId } as any);
+      return definitionId;
+    },
+    onSuccess: (defId) => {
+      setSavedDefinitionIds(prev => new Set([...prev, defId]));
+      queryClient.invalidateQueries({ queryKey: ["saved-words"] });
     },
   });
 
@@ -59,6 +110,10 @@ export default function Vocabulary() {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSearch();
   };
+
+  const allDefinitionsSaved = activeWord
+    ? activeWord.definitions.every(d => savedDefinitionIds.has(d.id))
+    : false;
 
   return (
     <Layout>
@@ -137,12 +192,12 @@ export default function Vocabulary() {
                       variant="ghost"
                       size="icon"
                       className="text-muted-foreground hover:text-foreground"
-                      onClick={() => saveMutation.mutate(activeWord)}
-                      disabled={saveMutation.isPending || saved}
+                      onClick={() => saveAllMutation.mutate(activeWord)}
+                      disabled={saveAllMutation.isPending || allDefinitionsSaved}
                     >
-                      {saved ? (
+                      {allDefinitionsSaved ? (
                         <Check className="w-5 h-5 text-green-500" />
-                      ) : saveMutation.isPending ? (
+                      ) : saveAllMutation.isPending ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
                       ) : (
                         <BookmarkPlus className="w-5 h-5" />
@@ -156,55 +211,75 @@ export default function Vocabulary() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-foreground">Meanings</h3>
 
-                {activeWord.definitions.map((def, index) => (
-                  <div
-                    key={index}
-                    className="glass-card overflow-hidden p-6 hover:border-primary/20 transition-all group"
-                  >
-                    <div className="flex items-start gap-4 mb-4">
-                      <span className="w-8 h-8 shrink-0 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold">
-                        {index + 1}
-                      </span>
-                      <div>
-                        <span className="text-xs text-primary font-bold uppercase tracking-widest">
-                          {def.part_of_speech}
+                {activeWord.definitions.map((def, index) => {
+                  const isDefSaved = savedDefinitionIds.has(def.id);
+                  return (
+                    <div
+                      key={index}
+                      className="glass-card overflow-hidden p-6 hover:border-primary/20 transition-all group"
+                    >
+                      <div className="flex items-start gap-4 mb-4">
+                        <span className="w-8 h-8 shrink-0 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold">
+                          {index + 1}
                         </span>
-                        <p className="text-foreground font-medium text-xl mt-1 leading-relaxed">
-                          {def.translation}
-                        </p>
-                        {def.details && (
-                          <p className="text-muted-foreground text-sm mt-1">{def.details}</p>
+                        <div className="flex-1">
+                          <span className="text-xs text-primary font-bold uppercase tracking-widest">
+                            {def.part_of_speech}
+                          </span>
+                          <p className="text-foreground font-medium text-xl mt-1 leading-relaxed">
+                            {def.translation}
+                          </p>
+                          {def.details && (
+                            <p className="text-muted-foreground text-sm mt-1">{def.details}</p>
+                          )}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="shrink-0 text-muted-foreground hover:text-foreground"
+                          onClick={() => saveDefinitionMutation.mutate({ word: activeWord, definitionId: def.id })}
+                          disabled={isDefSaved || saveDefinitionMutation.isPending}
+                        >
+                          {isDefSaved ? (
+                            <Check className="w-4 h-4 text-green-500" />
+                          ) : (
+                            <BookmarkPlus className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </div>
+
+                      <div className="ml-12 space-y-4">
+                        {def.example && (
+                          <div className="space-y-2">
+                            {parseExamples(def.example).map((ex, i) => (
+                              <div key={i} className="p-4 bg-muted/40 rounded-xl border-l-4 border-primary/50 italic font-serif text-muted-foreground">
+                                "{ex}"
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {def.direct_synonyms && (
+                          <div className="space-y-2">
+                            <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
+                              Synonyms
+                            </span>
+                            <div className="flex flex-wrap gap-2">
+                              {def.direct_synonyms.split(",").map((syn) => (
+                                <span
+                                  key={syn.trim()}
+                                  className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-semibold hover:bg-primary/20 transition-colors cursor-pointer"
+                                >
+                                  {syn.trim()}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
                         )}
                       </div>
                     </div>
-
-                    <div className="ml-12 space-y-4">
-                      {def.example && (
-                        <div className="p-4 bg-muted/40 rounded-xl border-l-4 border-primary/50 italic font-serif text-muted-foreground">
-                          "{def.example}"
-                        </div>
-                      )}
-
-                      {def.direct_synonyms && (
-                        <div className="space-y-2">
-                          <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
-                            Synonyms
-                          </span>
-                          <div className="flex flex-wrap gap-2">
-                            {def.direct_synonyms.split(",").map((syn) => (
-                              <span
-                                key={syn.trim()}
-                                className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-semibold hover:bg-primary/20 transition-colors cursor-pointer"
-                              >
-                                {syn.trim()}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Nuanced Related Words */}

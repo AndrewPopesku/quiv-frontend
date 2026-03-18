@@ -1,3 +1,19 @@
+import type { Word as ApiWord } from "@/api/models/Word";
+import type { WordBasic } from "@/api/models/WordBasic";
+
+export interface WordLookupResponse {
+    word: WordBasic;
+    is_saved: boolean;
+    user_word_id: number | null;
+    saved_definitions: number[];
+}
+
+export interface ExtendedWord extends ApiWord {
+    is_saved: boolean;
+    user_word_id: number | null;
+    saved_definitions: number[];
+}
+
 export interface CinemaExample {
     title: string;
     timestamp: string;

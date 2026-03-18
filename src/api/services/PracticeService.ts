@@ -2,24 +2,24 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Analysis } from '../models/Analysis';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class PracticeService {
     /**
-     * @param text Text to analyze
-     * @returns any No response body
+     * @param requestBody
+     * @returns Analysis
      * @throws ApiError
      */
     public static practiceAnalyzeCreate(
-        text?: string,
-    ): CancelablePromise<any> {
+        requestBody: Analysis,
+    ): CancelablePromise<Analysis> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/practice/analyze/',
-            query: {
-                'text': text,
-            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 }

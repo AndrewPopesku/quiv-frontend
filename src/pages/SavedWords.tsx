@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -16,16 +17,17 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { DictionaryService } from "@/api";
 
 export default function SavedWords() {
+    const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState("");
 
     const { data: words = [], isLoading, error } = useQuery({
         queryKey: ["saved-words"],
-        queryFn: () => DictionaryService.dictionaryWordsList(),
+        queryFn: () => DictionaryService.dictionaryUserWordsList(),
     });
 
     const deleteMutation = useMutation({
-        mutationFn: (id: number) => DictionaryService.dictionaryWordsDestroy(id),
+        mutationFn: (id: number) => DictionaryService.dictionaryUserWordsDestroy(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["saved-words"] });
             queryClient.invalidateQueries({ queryKey: ["daily-stats"] });
@@ -33,13 +35,12 @@ export default function SavedWords() {
     });
 
     const resetMasteryMutation = useMutation({
-        mutationFn: (id: number) => DictionaryService.dictionaryWordsResetMasteryCreate(id, {} as any),
+        mutationFn: (id: number) => DictionaryService.dictionaryUserWordsResetMasteryCreate(id, {} as any),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["saved-words"] }),
     });
 
     const filteredWords = words.filter(w =>
-        w.word.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        w.word.definitions[0]?.translation.toLowerCase().includes(searchTerm.toLowerCase())
+        w.word.term.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const handleDelete = (id: number) => {
@@ -86,7 +87,7 @@ export default function SavedWords() {
                     <>
                         <div className="grid grid-cols-12 gap-4 p-5 bg-muted/30 border-b border-border text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                             <div className="col-span-5 md:col-span-4 pl-4">Word</div>
-                            <div className="col-span-4 hidden md:block border-l border-border/50 pl-4">First Definition</div>
+                            <div className="col-span-4 hidden md:block border-l border-border/50 pl-4">Phonetic</div>
                             <div className="col-span-4 md:col-span-2 border-l border-border/50 pl-4">Mastery</div>
                             <div className="col-span-3 md:col-span-2 text-right pr-4">Actions</div>
                         </div>
@@ -97,6 +98,7 @@ export default function SavedWords() {
                                     key={userWord.id}
                                     className="grid grid-cols-12 gap-4 p-5 items-center hover:bg-muted/20 transition-all cursor-pointer group animate-in fade-in slide-in-from-bottom-2"
                                     style={{ animationDelay: `${index * 50}ms` }}
+                                    onClick={() => navigate(`/saved-words/${userWord.id}`)}
                                 >
                                     <div className="col-span-5 md:col-span-4 pl-4">
                                         <div className="font-bold text-foreground text-lg group-hover:text-primary transition-colors">{userWord.word.term}</div>
@@ -104,25 +106,25 @@ export default function SavedWords() {
                                     </div>
 
                                     <div className="col-span-4 hidden md:block text-sm text-muted-foreground truncate pr-4 border-l border-border/10 pl-4">
-                                        {userWord.word.definitions[0]?.translation || "No definition available"}
+                                        {userWord.word.phonetic || "—"}
                                     </div>
 
                                     <div className="col-span-4 md:col-span-2 border-l border-border/10 pl-4">
                                         <div className="flex items-center gap-2 mb-2">
                                             <span className={cn(
                                                 "text-[10px] font-bold px-1.5 py-0.5 rounded",
-                                                userWord.mastery >= 100 ? "bg-green-500/10 text-green-500" : "bg-primary/10 text-primary"
+                                                (userWord.mastery ?? 0) >= 100 ? "bg-green-500/10 text-green-500" : "bg-primary/10 text-primary"
                                             )}>
-                                                {userWord.mastery}%
+                                                {userWord.mastery ?? 0}%
                                             </span>
                                         </div>
                                         <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
                                             <div
                                                 className={cn(
                                                     "h-full rounded-full transition-all duration-500",
-                                                    userWord.mastery >= 100 ? "bg-green-500" : "progress-gold"
+                                                    (userWord.mastery ?? 0) >= 100 ? "bg-green-500" : "progress-gold"
                                                 )}
-                                                style={{ width: `${userWord.mastery}%` }}
+                                                style={{ width: `${userWord.mastery ?? 0}%` }}
                                             ></div>
                                         </div>
                                     </div>

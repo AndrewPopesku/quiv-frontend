@@ -3,7 +3,7 @@ import { join } from "path";
 import index from "./index.html";
 
 const publicDir = join(import.meta.dir, "..", "public");
-const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:8002";
+const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:8000";
 
 const server = serve({
   routes: {
@@ -13,11 +13,16 @@ const server = serve({
       const targetUrl = `${API_BASE_URL}${url.pathname}${url.search}`;
       const headers = new Headers(req.headers);
       headers.delete("host");
+      headers.delete("transfer-encoding");
+
+      const body = req.method !== "GET" && req.method !== "HEAD"
+        ? await req.arrayBuffer()
+        : undefined;
 
       const res = await fetch(targetUrl, {
         method: req.method,
         headers,
-        body: req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined,
+        body,
       });
 
       return new Response(res.body, {

@@ -7,6 +7,7 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { Analysis } from './models/Analysis';
 export type { DailyStats } from './models/DailyStats';
 export type { Definition } from './models/Definition';
 export type { Language } from './models/Language';
@@ -17,9 +18,12 @@ export type { ProfileRetrieve } from './models/ProfileRetrieve';
 export type { TokenObtainPair } from './models/TokenObtainPair';
 export type { TokenRefresh } from './models/TokenRefresh';
 export type { User } from './models/User';
+export type { UserDefinition } from './models/UserDefinition';
 export type { UserRetrieve } from './models/UserRetrieve';
 export type { UserWord } from './models/UserWord';
+export type { UserWordList } from './models/UserWordList';
 export type { Word } from './models/Word';
+export type { WordBasic } from './models/WordBasic';
 export type { WordOfTheDay } from './models/WordOfTheDay';
 
 export { ActivityService } from './services/ActivityService';

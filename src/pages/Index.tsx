@@ -55,7 +55,7 @@ const Index = () => {
       </div>
 
       {/* Exercise Selection Area */}
-      {/* <div className="mb-12 fade-in" style={{ animationDelay: '100ms' }}>
+      <div className="mb-12 fade-in" style={{ animationDelay: '100ms' }}>
         <h2 className="text-2xl font-bold text-foreground mb-8 flex items-center gap-3">
           <Book className="text-primary w-6 h-6" /> Choose an Exercise
         </h2>
@@ -69,7 +69,7 @@ const Index = () => {
             />
           ))}
         </div>
-      </div> */}
+      </div>
 
       {/* Remaining Dashboard items */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">

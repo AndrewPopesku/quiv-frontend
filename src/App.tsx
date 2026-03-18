@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Writing from "./pages/Writing";
 import Vocabulary from "./pages/Vocabulary";
 import SavedWords from "./pages/SavedWords";
+import SavedWordDetail from "./pages/SavedWordDetail";
 import Profile from "./pages/Profile";
 import Flashcards from "./pages/exercises/Flashcards";
 import Matching from "./pages/exercises/Matching";
@@ -54,6 +55,7 @@ function AppRoutes() {
       <Route path="/writing" element={<Writing />} />
       <Route path="/vocabulary" element={<Vocabulary />} />
       <Route path="/saved-words" element={<SavedWords />} />
+      <Route path="/saved-words/:id" element={<SavedWordDetail />} />
       <Route path="/exercises/flashcards" element={<Flashcards />} />
       <Route path="/exercises/matching" element={<Matching />} />
       <Route path="/exercises/multiple-choice" element={<MultipleChoice />} />

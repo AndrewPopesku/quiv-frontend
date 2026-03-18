@@ -1,9 +1,16 @@
 import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Link as LinkIcon, Sparkles } from "lucide-react";
-import { MOCK_WORDS } from "@/data/mock-words";
+import { RefreshCw, Link as LinkIcon, Sparkles, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { DictionaryService } from "@/api";
+
+interface ExerciseWord {
+    id: string;
+    term: string;
+    definition: string;
+}
 
 interface MatchItem {
     id: string;
@@ -18,8 +25,26 @@ export default function Matching() {
     const [matchedIds, setMatchedIds] = useState<Set<string>>(new Set());
     const [wrongPair, setWrongPair] = useState<[string, string] | null>(null);
 
-    const setupGame = () => {
-        const gameWords = MOCK_WORDS.slice(0, 4);
+    const { data: words = [], isLoading } = useQuery<ExerciseWord[]>({
+        queryKey: ["exercise-words"],
+        queryFn: async () => {
+            const userWords = await DictionaryService.dictionaryUserWordsList();
+            const wordsWithDefs = await Promise.all(
+                userWords.map(async (uw) => {
+                    const def = await DictionaryService.dictionaryWordsDefinitionsLookupRetrieve(uw.word.id);
+                    return {
+                        id: String(uw.word.id),
+                        term: uw.word.term,
+                        definition: def.translation ?? "",
+                    };
+                })
+            );
+            return wordsWithDefs.filter(w => w.definition);
+        },
+    });
+
+    const setupGame = (wordList: ExerciseWord[]) => {
+        const gameWords = wordList.slice(0, 4);
 
         const terms: MatchItem[] = gameWords.map(w => ({
             id: `term-${w.id}`,
@@ -30,7 +55,7 @@ export default function Matching() {
 
         const defs: MatchItem[] = gameWords.map(w => ({
             id: `def-${w.id}`,
-            content: w.definitions[0]?.text || "",
+            content: w.definition,
             type: 'DEF',
             wordId: w.id
         }));
@@ -43,8 +68,10 @@ export default function Matching() {
     };
 
     useEffect(() => {
-        setupGame();
-    }, []);
+        if (words.length >= 4 && items.length === 0) {
+            setupGame(words);
+        }
+    }, [words]);
 
     const handleClick = (item: MatchItem) => {
         if (matchedIds.has(item.id) || wrongPair) return;
@@ -75,6 +102,26 @@ export default function Matching() {
 
     const isComplete = items.length > 0 && matchedIds.size === items.length;
 
+    if (isLoading) {
+        return (
+            <Layout>
+                <div className="flex items-center justify-center py-20">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+            </Layout>
+        );
+    }
+
+    if (words.length < 4) {
+        return (
+            <Layout>
+                <div className="text-center py-20 text-muted-foreground">
+                    You need at least 4 saved words to play. Add more words to your collection.
+                </div>
+            </Layout>
+        );
+    }
+
     return (
         <Layout>
             <div className="max-w-6xl mx-auto py-8 fade-in">
@@ -88,7 +135,7 @@ export default function Matching() {
                     </div>
                     <Button
                         variant="outline"
-                        onClick={setupGame}
+                        onClick={() => setupGame(words)}
                         className="gap-2 border-border/50 hover:bg-muted h-12 rounded-xl px-6"
                     >
                         <RefreshCw size={18} className={cn(isComplete && "animate-spin")} /> Reset Game
@@ -129,7 +176,7 @@ export default function Matching() {
                             Perfect Match!
                         </h2>
                         <Button
-                            onClick={setupGame}
+                            onClick={() => setupGame(words)}
                             size="lg"
                             className="h-14 px-10 rounded-2xl font-bold text-lg bg-primary text-primary-foreground hover:scale-105 transition-transform shadow-glow"
                         >

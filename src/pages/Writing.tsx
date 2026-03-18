@@ -10,7 +10,7 @@ import {
     Globe,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { DictionaryService } from "@/api";
+import { PracticeService } from "@/api";
 import { NaturalnessScore } from "@/components/writing/NaturalnessScore";
 import { SourceDetected } from "@/components/writing/SourceDetected";
 import { SuggestionCard } from "@/components/writing/SuggestionCard";
@@ -29,7 +29,7 @@ export default function Writing() {
 
         setIsLoading(true);
         try {
-            const response: any = await DictionaryService.dictionaryWordsRefineRetrieve(text);
+            const response: any = await PracticeService.practiceAnalyzeCreate({ text });
 
             if (response.mode === "analysis") {
                 const d = response.data;

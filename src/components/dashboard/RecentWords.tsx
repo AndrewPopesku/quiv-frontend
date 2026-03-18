@@ -9,7 +9,7 @@ export function RecentWords() {
   const navigate = useNavigate();
   const { data: words = [] } = useQuery({
     queryKey: ["saved-words"],
-    queryFn: () => DictionaryService.dictionaryWordsList(),
+    queryFn: () => DictionaryService.dictionaryUserWordsList(),
   });
 
   const recent = words.slice(0, 4);
@@ -51,7 +51,7 @@ export function RecentWords() {
               <div>
                 <p className="font-medium text-foreground">{item.word.term}</p>
                 <p className="text-xs text-muted-foreground">
-                  {item.word.definitions?.[0]?.translation ?? ""}
+                  {item.word.phonetic}
                 </p>
               </div>
             </div>

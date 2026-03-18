@@ -2,10 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type UserWord = {
+export type UserDefinition = {
     readonly id: number;
-    word: number;
-    readonly mastery: number;
+    definition: number;
     readonly created_at: string;
 };
 

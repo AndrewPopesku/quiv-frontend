@@ -2,19 +2,35 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Definition } from '../models/Definition';
+import type { Language } from '../models/Language';
+import type { NuancedRelatedWord } from '../models/NuancedRelatedWord';
+import type { UserDefinition } from '../models/UserDefinition';
 import type { UserWord } from '../models/UserWord';
+import type { UserWordList } from '../models/UserWordList';
+import type { WordBasic } from '../models/WordBasic';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class DictionaryService {
     /**
-     * @returns UserWord
+     * @returns Language
      * @throws ApiError
      */
-    public static dictionaryWordsList(): CancelablePromise<Array<UserWord>> {
+    public static dictionaryLanguagesList(): CancelablePromise<Array<Language>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/dictionary/words/',
+            url: '/api/dictionary/languages/',
+        });
+    }
+    /**
+     * @returns UserWordList
+     * @throws ApiError
+     */
+    public static dictionaryUserWordsList(): CancelablePromise<Array<UserWordList>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/dictionary/user_words/',
         });
     }
     /**
@@ -22,30 +38,14 @@ export class DictionaryService {
      * @returns UserWord
      * @throws ApiError
      */
-    public static dictionaryWordsCreate(
+    public static dictionaryUserWordsCreate(
         requestBody: UserWord,
     ): CancelablePromise<UserWord> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/dictionary/words/',
+            url: '/api/dictionary/user_words/',
             body: requestBody,
             mediaType: 'application/json',
-        });
-    }
-    /**
-     * @param id A unique integer value identifying this user word.
-     * @returns UserWord
-     * @throws ApiError
-     */
-    public static dictionaryWordsRetrieve(
-        id: number,
-    ): CancelablePromise<UserWord> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/dictionary/words/{id}/',
-            path: {
-                'id': id,
-            },
         });
     }
     /**
@@ -53,12 +53,12 @@ export class DictionaryService {
      * @returns void
      * @throws ApiError
      */
-    public static dictionaryWordsDestroy(
+    public static dictionaryUserWordsDestroy(
         id: number,
     ): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/api/dictionary/words/{id}/',
+            url: '/api/dictionary/user_words/{id}/',
             path: {
                 'id': id,
             },
@@ -70,13 +70,13 @@ export class DictionaryService {
      * @returns UserWord
      * @throws ApiError
      */
-    public static dictionaryWordsResetMasteryCreate(
+    public static dictionaryUserWordsResetMasteryCreate(
         id: number,
         requestBody: UserWord,
     ): CancelablePromise<UserWord> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/dictionary/words/{id}/reset-mastery/',
+            url: '/api/dictionary/user_words/{id}/reset-mastery/',
             path: {
                 'id': id,
             },
@@ -85,32 +85,103 @@ export class DictionaryService {
         });
     }
     /**
-     * @param text Text to be refined
-     * @returns UserWord
+     * @param userWordPk
+     * @returns UserDefinition
      * @throws ApiError
      */
-    public static dictionaryWordsRefineRetrieve(
-        text?: string,
-    ): CancelablePromise<UserWord> {
+    public static dictionaryUserWordsLearnedDefinitionsList(
+        userWordPk: number,
+    ): CancelablePromise<Array<UserDefinition>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/dictionary/words/refine/',
-            query: {
-                'text': text,
+            url: '/api/dictionary/user_words/{user_word_pk}/learned_definitions/',
+            path: {
+                'user_word_pk': userWordPk,
             },
         });
     }
     /**
-     * @param term Term to be translated
-     * @returns UserWord
+     * @param userWordPk
+     * @param requestBody
+     * @returns UserDefinition
      * @throws ApiError
      */
-    public static dictionaryWordsTranslateRetrieve(
-        term?: string,
-    ): CancelablePromise<UserWord> {
+    public static dictionaryUserWordsLearnedDefinitionsCreate(
+        userWordPk: number,
+        requestBody: UserDefinition,
+    ): CancelablePromise<UserDefinition> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/dictionary/user_words/{user_word_pk}/learned_definitions/',
+            path: {
+                'user_word_pk': userWordPk,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @param id A unique integer value identifying this user definition.
+     * @param userWordPk
+     * @returns void
+     * @throws ApiError
+     */
+    public static dictionaryUserWordsLearnedDefinitionsDestroy(
+        id: number,
+        userWordPk: number,
+    ): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/dictionary/user_words/{user_word_pk}/learned_definitions/{id}/',
+            path: {
+                'id': id,
+                'user_word_pk': userWordPk,
+            },
+        });
+    }
+    /**
+     * @param wordPk
+     * @returns Definition
+     * @throws ApiError
+     */
+    public static dictionaryWordsDefinitionsLookupRetrieve(
+        wordPk: number,
+    ): CancelablePromise<Definition> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/dictionary/words/translate/',
+            url: '/api/dictionary/words/{word_pk}/definitions/lookup/',
+            path: {
+                'word_pk': wordPk,
+            },
+        });
+    }
+    /**
+     * @param wordPk
+     * @returns NuancedRelatedWord
+     * @throws ApiError
+     */
+    public static dictionaryWordsNuancesLookupRetrieve(
+        wordPk: number,
+    ): CancelablePromise<NuancedRelatedWord> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/dictionary/words/{word_pk}/nuances/lookup/',
+            path: {
+                'word_pk': wordPk,
+            },
+        });
+    }
+    /**
+     * @param term Term to be looked up
+     * @returns WordBasic
+     * @throws ApiError
+     */
+    public static dictionaryWordsLookupRetrieve(
+        term?: string,
+    ): CancelablePromise<WordBasic> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/dictionary/words/lookup/',
             query: {
                 'term': term,
             },

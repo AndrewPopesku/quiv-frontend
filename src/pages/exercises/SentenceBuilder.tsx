@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,52 +9,56 @@ import {
     XCircle,
     Trophy,
     PenTool,
-    Sparkles
+    Sparkles,
+    Loader2
 } from "lucide-react";
-import { MOCK_WORDS } from "@/data/mock-words";
 import { cn } from "@/lib/utils";
-import type { Word, AnalysisResult } from "@/types/vocabulary";
+import { useQuery } from "@tanstack/react-query";
+import { DictionaryService, PracticeService } from "@/api";
+import type { AnalysisResult } from "@/types/vocabulary";
 
-// Mock AI service for now since we don't have the API key setup tools handy
-// In a real scenario, we'd use the genuine geminiService
-const mockAnalyzeSentence = async (text: string, word: string): Promise<AnalysisResult> => {
-    await new Promise(r => setTimeout(r, 1500));
-    const hasWord = text.toLowerCase().includes(word.toLowerCase());
-
-    if (!hasWord) {
-        return {
-            score: 30,
-            grammarStatus: 'Good',
-            vocabularyStatus: 'Needs Work',
-            styleStatus: 'Good',
-            suggestions: [],
-            tips: [`Please make sure to use the word "${word}" in your sentence.`]
-        };
-    }
-
-    return {
-        score: 85,
-        grammarStatus: 'Excellent',
-        vocabularyStatus: 'Excellent',
-        styleStatus: 'Good',
-        suggestions: [],
-        tips: [
-            "Great usage of the target word!",
-            "The sentence flows naturally and maintains proper context."
-        ]
-    };
-};
+interface ExerciseWord {
+    id: string;
+    term: string;
+    phonetic: string;
+    definitions: Array<{ text: string }>;
+}
 
 export default function SentenceBuilder() {
-    const [currentWord, setCurrentWord] = useState<Word>(MOCK_WORDS[Math.floor(Math.random() * MOCK_WORDS.length)] || MOCK_WORDS[0]);
+    const [currentWord, setCurrentWord] = useState<ExerciseWord | null>(null);
     const [userInput, setUserInput] = useState("");
     const [feedback, setFeedback] = useState<AnalysisResult | null>(null);
     const [loading, setLoading] = useState(false);
     const [completed, setCompleted] = useState(false);
 
+    const { data: words = [], isLoading } = useQuery<ExerciseWord[]>({
+        queryKey: ["exercise-words"],
+        queryFn: async () => {
+            const userWords = await DictionaryService.dictionaryUserWordsList();
+            const wordsWithDefs = await Promise.all(
+                userWords.map(async (uw) => {
+                    const def = await DictionaryService.dictionaryWordsDefinitionsLookupRetrieve(uw.word.id);
+                    return {
+                        id: String(uw.word.id),
+                        term: uw.word.term,
+                        phonetic: uw.word.phonetic,
+                        definitions: [{ text: def.translation ?? "" }],
+                    };
+                })
+            );
+            return wordsWithDefs;
+        },
+    });
+
+    useEffect(() => {
+        if (words.length > 0 && !currentWord) {
+            setCurrentWord(words[Math.floor(Math.random() * words.length)]);
+        }
+    }, [words]);
+
     const pickRandomWord = () => {
-        const randomIndex = Math.floor(Math.random() * MOCK_WORDS.length);
-        const random = MOCK_WORDS[randomIndex] || MOCK_WORDS[0];
+        if (words.length === 0) return;
+        const random = words[Math.floor(Math.random() * words.length)];
         setCurrentWord(random);
         setUserInput("");
         setFeedback(null);
@@ -62,10 +66,18 @@ export default function SentenceBuilder() {
     };
 
     const checkAnswer = async () => {
-        if (!userInput.trim()) return;
+        if (!userInput.trim() || !currentWord) return;
         setLoading(true);
         try {
-            const result = await mockAnalyzeSentence(userInput, currentWord.term);
+            const response: any = await PracticeService.practiceAnalyzeCreate({ text: userInput });
+            const result: AnalysisResult = {
+                score: response.data?.naturalness_score ?? 0,
+                grammarStatus: response.data?.grammar_rating ?? 'Good',
+                vocabularyStatus: response.data?.vocabulary_rating ?? 'Good',
+                styleStatus: response.data?.style_rating ?? 'Good',
+                suggestions: [],
+                tips: response.data?.improvement_tips ?? [],
+            };
             setFeedback(result);
             if (result.score > 70) {
                 setCompleted(true);
@@ -76,6 +88,28 @@ export default function SentenceBuilder() {
             setLoading(false);
         }
     };
+
+    if (isLoading) {
+        return (
+            <Layout>
+                <div className="flex items-center justify-center py-20">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+            </Layout>
+        );
+    }
+
+    if (words.length === 0) {
+        return (
+            <Layout>
+                <div className="text-center py-20 text-muted-foreground">
+                    No saved words yet. Add some words to your collection first.
+                </div>
+            </Layout>
+        );
+    }
+
+    if (!currentWord) return null;
 
     return (
         <Layout>
@@ -102,7 +136,7 @@ export default function SentenceBuilder() {
                         <h2 className="text-6xl font-black text-secondary mb-3 tracking-tighter relative z-10">{currentWord.term}</h2>
                         <p className="text-muted-foreground font-serif italic text-2xl mb-6 relative z-10">{currentWord.phonetic}</p>
                         <div className="inline-block bg-muted/50 backdrop-blur-sm px-6 py-2.5 rounded-xl text-sm font-medium text-foreground border border-border/50 relative z-10">
-                            {currentWord.definitions[0]?.text}
+                            {currentWord.definitions?.[0]?.text}
                         </div>
                     </div>
 
