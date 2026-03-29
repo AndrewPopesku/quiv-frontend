@@ -67,10 +67,8 @@ function AppRoutes() {
   );
 }
 
-const GOOGLE_CLIENT_ID = (window as any).__ENV__?.GOOGLE_CLIENT_ID || "";
-
 const App = () => (
-  <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+  <GoogleOAuthProvider clientId={(window as any).__ENV__?.GOOGLE_CLIENT_ID || ""}>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
