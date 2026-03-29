@@ -4,6 +4,7 @@ import index from "./index.html";
 
 const publicDir = join(import.meta.dir, "..", "public");
 const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:8000";
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
 
 const server = serve({
   routes: {
@@ -41,11 +42,17 @@ const server = serve({
       return new Response("Not found", { status: 404 });
     },
 
+    // Serve env config for frontend
+    "/env.js": () => new Response(
+      `window.__ENV__=${JSON.stringify({ GOOGLE_CLIENT_ID })};`,
+      { headers: { "Content-Type": "application/javascript" } }
+    ),
+
     // Serve index.html for all other routes (SPA)
     "/*": index,
   },
 
-  development: process.env.NODE_ENV === "production" ? false : {
+  development: {
     hmr: true,
     console: true,
   },

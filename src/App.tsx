@@ -67,7 +67,7 @@ function AppRoutes() {
   );
 }
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
+const GOOGLE_CLIENT_ID = (window as any).__ENV__?.GOOGLE_CLIENT_ID || "";
 
 const App = () => (
   <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
