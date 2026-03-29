@@ -2,6 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { GoogleAuth } from '../models/GoogleAuth';
+import type { GoogleAuthResponse } from '../models/GoogleAuthResponse';
 import type { PatchedUser } from '../models/PatchedUser';
 import type { TokenObtainPair } from '../models/TokenObtainPair';
 import type { TokenRefresh } from '../models/TokenRefresh';
@@ -19,6 +21,21 @@ export class UserService {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/user/delete/',
+        });
+    }
+    /**
+     * @param requestBody
+     * @returns GoogleAuthResponse
+     * @throws ApiError
+     */
+    public static userGoogleCreate(
+        requestBody: GoogleAuth,
+    ): CancelablePromise<GoogleAuthResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/user/google/',
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**

@@ -10,6 +10,8 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 export type { Analysis } from './models/Analysis';
 export type { DailyStats } from './models/DailyStats';
 export type { Definition } from './models/Definition';
+export type { GoogleAuth } from './models/GoogleAuth';
+export type { GoogleAuthResponse } from './models/GoogleAuthResponse';
 export type { Language } from './models/Language';
 export type { NuancedRelatedWord } from './models/NuancedRelatedWord';
 export type { PatchedUser } from './models/PatchedUser';

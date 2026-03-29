@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Sparkles, LogIn, UserPlus, Loader2 } from "lucide-react";
+import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { UserService, DictionaryService } from "@/api";
 import type { Language } from "@/api/models/Language";
 
-type View = "login" | "register";
+type View = "login" | "register" | "google-profile";
 
 const inputClass =
     "w-full bg-muted border border-border rounded-xl py-2.5 px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-sm";
@@ -33,6 +34,11 @@ export default function Login() {
     const [regConfirmPassword, setRegConfirmPassword] = useState("");
     const [regUserLanguage, setRegUserLanguage] = useState("");
     const [regTargetLanguage, setRegTargetLanguage] = useState("");
+
+    // Google auth fields
+    const [googleIdToken, setGoogleIdToken] = useState("");
+    const [googleUserLanguage, setGoogleUserLanguage] = useState("");
+    const [googleTargetLanguage, setGoogleTargetLanguage] = useState("");
 
     useEffect(() => {
         DictionaryService.dictionaryLanguagesList().then(setLanguages).catch(() => {});
@@ -95,6 +101,58 @@ export default function Login() {
         }
     };
 
+    const handleGoogleSuccess = async (response: CredentialResponse) => {
+        if (!response.credential) return;
+        setError("");
+        setIsLoading(true);
+        try {
+            const result = await UserService.userGoogleCreate({
+                id_token: response.credential,
+            });
+            login(result.access, result.refresh);
+        } catch (err: any) {
+            const detail = err?.body?.detail;
+            if (detail && detail.includes("Profile data")) {
+                // New user — need language selection
+                setGoogleIdToken(response.credential);
+                setView("google-profile");
+            } else {
+                setError("Google sign-in failed. Please try again.");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleGoogleProfileSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        if (!googleUserLanguage || !googleTargetLanguage) {
+            setError("Please select both languages.");
+            return;
+        }
+        if (googleUserLanguage === googleTargetLanguage) {
+            setError("Native and target languages must be different.");
+            return;
+        }
+        setIsLoading(true);
+        try {
+            const result = await UserService.userGoogleCreate({
+                id_token: googleIdToken,
+                profile: {
+                    user_language: Number(googleUserLanguage),
+                    target_language: Number(googleTargetLanguage),
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                },
+            });
+            login(result.access, result.refresh);
+        } catch {
+            setError("Failed to create account. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const switchView = (newView: View) => {
         setView(newView);
         setError("");
@@ -131,6 +189,23 @@ export default function Login() {
                                 {isLoading ? <Loader2 size={18} className="animate-spin" /> : <LogIn size={18} />}
                                 Sign In
                             </Button>
+                            <div className="relative my-2">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-border" />
+                                </div>
+                                <div className="relative flex justify-center text-xs uppercase">
+                                    <span className="bg-background px-2 text-muted-foreground">or</span>
+                                </div>
+                            </div>
+                            <div className="flex justify-center">
+                                <GoogleLogin
+                                    onSuccess={handleGoogleSuccess}
+                                    onError={() => setError("Google sign-in failed.")}
+                                    theme="filled_black"
+                                    size="large"
+                                    width="100%"
+                                />
+                            </div>
                             <p className="text-sm text-muted-foreground text-center">
                                 Don't have an account?{" "}
                                 <button type="button" onClick={() => switchView("register")} className="text-primary hover:underline font-medium">
@@ -182,10 +257,62 @@ export default function Login() {
                                 {isLoading ? <Loader2 size={18} className="animate-spin" /> : <UserPlus size={18} />}
                                 Create Account
                             </Button>
+                            <div className="relative my-2">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-border" />
+                                </div>
+                                <div className="relative flex justify-center text-xs uppercase">
+                                    <span className="bg-background px-2 text-muted-foreground">or</span>
+                                </div>
+                            </div>
+                            <div className="flex justify-center">
+                                <GoogleLogin
+                                    onSuccess={handleGoogleSuccess}
+                                    onError={() => setError("Google sign-in failed.")}
+                                    theme="filled_black"
+                                    size="large"
+                                    width="100%"
+                                />
+                            </div>
                             <p className="text-sm text-muted-foreground text-center">
                                 Already have an account?{" "}
                                 <button type="button" onClick={() => switchView("login")} className="text-primary hover:underline font-medium">
                                     Sign in
+                                </button>
+                            </p>
+                        </form>
+                    )}
+
+                    {view === "google-profile" && (
+                        <form onSubmit={handleGoogleProfileSubmit} className="space-y-4 text-left">
+                            <h1 className="text-2xl font-bold text-foreground text-center">Complete Your Profile</h1>
+                            <p className="text-sm text-muted-foreground text-center">Select your languages to get started</p>
+                            {error && <p className="text-sm text-destructive text-center">{error}</p>}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">I speak</label>
+                                <select value={googleUserLanguage} onChange={(e) => setGoogleUserLanguage(e.target.value)} required className={selectClass}>
+                                    <option value="">Select language</option>
+                                    {languages.map((l) => (
+                                        <option key={l.id} value={l.id}>{l.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">I want to learn</label>
+                                <select value={googleTargetLanguage} onChange={(e) => setGoogleTargetLanguage(e.target.value)} required className={selectClass}>
+                                    <option value="">Select language</option>
+                                    {languages.map((l) => (
+                                        <option key={l.id} value={l.id}>{l.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <Button type="submit" className="w-full gap-2" size="lg" disabled={isLoading}>
+                                {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+                                Get Started
+                            </Button>
+                            <p className="text-sm text-muted-foreground text-center">
+                                <button type="button" onClick={() => switchView("login")} className="text-primary hover:underline font-medium">
+                                    Back to sign in
                                 </button>
                             </p>
                         </form>
