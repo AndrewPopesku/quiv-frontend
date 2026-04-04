@@ -19,6 +19,8 @@ import Flashcards from "./pages/exercises/Flashcards";
 import Matching from "./pages/exercises/Matching";
 import MultipleChoice from "./pages/exercises/MultipleChoice";
 import SentenceBuilder from "./pages/exercises/SentenceBuilder";
+import PracticeHub from "./pages/practice/Hub";
+import PracticeSession from "./pages/practice/Session";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 // import "./index.css";

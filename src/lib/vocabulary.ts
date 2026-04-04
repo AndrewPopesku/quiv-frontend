@@ -1,4 +1,6 @@
-export function parseExamples(example: string): string[] {
+export function parseExamples(example: string | string[]): string[] {
+  if (Array.isArray(example)) return example;
+  if (typeof example !== "string") return [];
   const trimmed = example.trim();
   if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
     const matches = trimmed.match(/'((?:[^'\\]|\\.)*)'/g);

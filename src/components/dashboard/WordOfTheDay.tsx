@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Volume2, BookmarkPlus, ArrowRight, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityService, DictionaryService } from "@/api";
 
 const today = new Date().toISOString().split("T")[0];
@@ -39,7 +40,25 @@ export function WordOfTheDay() {
     },
   });
 
-  if (isLoading || !data) return null;
+  if (isLoading || !data) return (
+    <div className="bento-item relative overflow-hidden col-span-2 row-span-2 h-full">
+      <div className="relative h-full flex flex-col">
+        <div className="flex items-center justify-between mb-6">
+          <Skeleton className="h-6 w-32 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-md" />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-4 mb-4">
+            <Skeleton className="h-12 w-48" />
+          </div>
+          <Skeleton className="h-5 w-24 mb-2" />
+          <Skeleton className="h-6 w-3/4 mb-2" />
+          <Skeleton className="h-6 w-1/2" />
+        </div>
+        <Skeleton className="h-11 w-full mt-6 rounded-md" />
+      </div>
+    </div>
+  );
 
   const word = data.word;
   const firstDefinition = word.definitions?.[0];
@@ -88,7 +107,7 @@ export function WordOfTheDay() {
 
           {firstDefinition && (
             <p className="text-foreground/90 text-lg leading-relaxed mb-6">
-              {firstDefinition.translation}
+              {firstDefinition.details}
             </p>
           )}
         </div>
