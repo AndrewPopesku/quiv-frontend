@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
@@ -32,33 +32,12 @@ import {
   ScanSearch,
   Film,
   Zap,
-  Eye,
-  EyeOff,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-function redactForDifficulty(
-  sentence: string,
-  targetWord: string,
-  level: number
-): string {
-  const words = sentence.split(" ");
-  return words
-    .map((word) => {
-      if (word.toLowerCase().includes(targetWord.toLowerCase())) {
-        return "█".repeat(word.length);
-      }
-      const hideChance = (level - 1) / 9;
-      if (Math.random() < hideChance) {
-        return "█".repeat(word.length);
-      }
-      return word;
-    })
-    .join(" ");
-}
 
 function exerciseLabel(type: string): string {
   const map: Record<string, string> = {
@@ -134,23 +113,7 @@ function roundTypeBadgeColor(roundType: string): string {
 // Sub-components
 // ---------------------------------------------------------------------------
 
-interface ExerciseContextProps {
-  item: PracticeItem;
-  difficulty: number;
-  onDifficultyChange: (val: number) => void;
-  redactedSentence: string;
-  showRedacted: boolean;
-  onToggleRedacted: () => void;
-}
-
-function ExerciseContext({
-  item,
-  difficulty,
-  onDifficultyChange,
-  redactedSentence,
-  showRedacted,
-  onToggleRedacted,
-}: ExerciseContextProps) {
+function ExerciseContext({ item }: { item: PracticeItem }) {
   const { exercise_type, prompt, payload } = item;
 
   switch (exercise_type) {
@@ -158,39 +121,31 @@ function ExerciseContext({
       return (
         <div className="space-y-3">
           <p className="text-xl font-medium leading-relaxed text-foreground">{prompt}</p>
-          <div className="flex items-center gap-2 flex-wrap">
-            {payload.hint_letter && (
-              <Badge variant="outline" className="text-sm font-mono">
-                Starts with: <span className="text-primary font-bold ml-1">{payload.hint_letter}</span>
-              </Badge>
-            )}
-            {payload.translation && (
-              <span className="text-sm text-muted-foreground italic">{payload.translation}</span>
-            )}
-          </div>
+          {payload.translation_hint && (
+            <span className="text-sm text-muted-foreground italic">{payload.translation_hint}</span>
+          )}
         </div>
       );
 
     case "sentence_forge":
       return (
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 flex-wrap">
-            <Badge className="text-lg px-4 py-2 font-bold bg-primary/20 text-primary border-primary/30">
-              {payload.word}
-            </Badge>
-            {payload.part_of_speech && (
-              <Badge variant="outline" className="text-xs">
-                {payload.part_of_speech}
-              </Badge>
-            )}
-          </div>
-          {payload.translation && (
-            <p className="text-muted-foreground text-sm">{payload.translation}</p>
+        <div className="space-y-4">
+          {payload.situational_prompt && (
+            <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/20">
+              <p className="text-sm text-muted-foreground leading-relaxed">{payload.situational_prompt}</p>
+            </div>
           )}
-          {payload.context && (
-            <p className="text-sm italic text-muted-foreground border-l-2 border-border pl-3">
-              {payload.context}
-            </p>
+          {Array.isArray(payload.required_words) && payload.required_words.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Required words</p>
+              <div className="flex flex-wrap gap-2">
+                {payload.required_words.map((w: string) => (
+                  <Badge key={w} variant="outline" className="text-orange-400 border-orange-500/30 bg-orange-500/10 font-mono">
+                    {w}
+                  </Badge>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       );
@@ -200,18 +155,13 @@ function ExerciseContext({
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-purple-400">
             <Music className="w-5 h-5" />
-            {payload.song_title && payload.artist_name && (
+            {payload.song_title && (
               <span className="text-sm font-medium">
-                {payload.song_title} — {payload.artist_name}
+                {payload.song_title}{payload.artist ? ` — ${payload.artist}` : ""}
               </span>
             )}
           </div>
-          <p className="text-xl font-medium leading-relaxed text-foreground">{prompt}</p>
-          {payload.hint && (
-            <div className="text-sm text-muted-foreground">
-              Hint: <span className="font-mono text-foreground">{payload.hint}</span>
-            </div>
-          )}
+          <p className="text-xl font-medium leading-relaxed text-foreground font-mono">{prompt}</p>
         </div>
       );
 
@@ -266,29 +216,15 @@ function ExerciseContext({
     case "whisper_challenge":
       return (
         <div className="space-y-4">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-medium text-muted-foreground">
-              Difficulty: <span className="text-foreground font-bold">{difficulty}</span>/10
-            </span>
-            <button
-              onClick={onToggleRedacted}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {showRedacted ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              {showRedacted ? "Hide preview" : "Preview redaction"}
-            </button>
+          {payload.translation_hint && (
+            <p className="text-sm text-muted-foreground">
+              Translation: <span className="italic">{payload.translation_hint}</span>
+            </p>
+          )}
+          <div className="p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/20 font-mono text-2xl tracking-widest text-center">
+            {payload.degraded_word ?? prompt}
           </div>
-          <input
-            type="range"
-            min={1}
-            max={10}
-            value={difficulty}
-            onChange={(e) => onDifficultyChange(Number(e.target.value))}
-            className="w-full accent-indigo-400"
-          />
-          <div className="p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/20 font-mono text-base leading-relaxed">
-            {showRedacted ? redactedSentence : prompt}
-          </div>
+          <p className="text-xs text-muted-foreground text-center">Spell the full word</p>
         </div>
       );
 
@@ -318,17 +254,15 @@ function ExerciseContext({
       );
 
     case "duo_duel": {
-      const direction: string = payload.direction ?? "to_translation";
+      // Backend sends "l1_to_l2" or "l2_to_l1"
+      const direction: string = payload.direction ?? "l1_to_l2";
       return (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <ArrowLeftRight className="w-4 h-4 text-cyan-400" />
             <span className="text-sm text-muted-foreground">
-              {direction === "to_translation" ? "Translate →" : "← Translate back"}
+              {direction === "l1_to_l2" ? "Translation → Term" : "Term → Translation"}
             </span>
-            {payload.part_of_speech && (
-              <Badge variant="outline" className="text-xs">{payload.part_of_speech}</Badge>
-            )}
           </div>
           <p className="text-3xl font-bold text-foreground">{prompt}</p>
         </div>
@@ -338,28 +272,21 @@ function ExerciseContext({
     case "scenario_immersion":
       return (
         <div className="space-y-4">
-          {payload.scenario_description && (
+          {payload.scenario && (
             <div className="p-4 rounded-xl bg-pink-500/5 border border-pink-500/20">
-              <p className="text-sm text-muted-foreground leading-relaxed">{payload.scenario_description}</p>
-            </div>
-          )}
-          {payload.npc_opening && (
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-pink-500/20 border border-pink-500/30 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-4 h-4 text-pink-400" />
-              </div>
-              <div className="p-3 rounded-2xl rounded-tl-none bg-muted/40 border border-border text-sm">
-                {payload.npc_opening}
-              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">{payload.scenario}</p>
             </div>
           )}
           {Array.isArray(payload.required_words) && payload.required_words.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {payload.required_words.map((w: string) => (
-                <Badge key={w} variant="outline" className="text-pink-400 border-pink-500/30 bg-pink-500/10 font-mono text-xs">
-                  {w}
-                </Badge>
-              ))}
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Required words</p>
+              <div className="flex flex-wrap gap-2">
+                {payload.required_words.map((w: string) => (
+                  <Badge key={w} variant="outline" className="text-pink-400 border-pink-500/30 bg-pink-500/10 font-mono text-xs">
+                    {w}
+                  </Badge>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -369,11 +296,11 @@ function ExerciseContext({
       return (
         <div className="space-y-3">
           <div className="p-4 rounded-xl bg-yellow-500/5 border border-yellow-500/20 font-mono text-sm leading-relaxed whitespace-pre-wrap">
-            {payload.passage ?? prompt}
+            {payload.redacted_text ?? prompt}
           </div>
-          {payload.definition_hint && (
+          {payload.part_of_speech && (
             <p className="text-sm text-muted-foreground">
-              Definition: <span className="italic">{payload.definition_hint}</span>
+              Part of speech: <span className="italic">{payload.part_of_speech}</span>
             </p>
           )}
         </div>
@@ -382,18 +309,12 @@ function ExerciseContext({
     case "word_network":
       return (
         <div className="space-y-3">
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-2xl font-bold text-foreground">{payload.word ?? prompt}</span>
-            {payload.translation && (
-              <span className="text-muted-foreground text-base">({payload.translation})</span>
-            )}
-          </div>
-          {Array.isArray(payload.synonyms) && payload.synonyms.length > 0 && (
+          <p className="text-base text-foreground">{prompt}</p>
+          {Array.isArray(payload.all_synonyms) && payload.all_synonyms.length > 0 && (
             <div className="text-sm text-muted-foreground">
-              Related: {payload.synonyms.join(", ")}
+              Hint — related: {(payload.all_synonyms as string[]).slice(0, 2).join(", ")}…
             </div>
           )}
-          <p className="text-base text-foreground">{prompt}</p>
         </div>
       );
 
@@ -401,9 +322,9 @@ function ExerciseContext({
       return (
         <div className="space-y-4">
           <p className="text-base font-medium text-foreground">{prompt}</p>
-          {payload.source_text && (
+          {payload.original_sentence && (
             <div className="p-4 rounded-xl bg-muted/20 border border-border/60">
-              <p className="text-sm leading-relaxed text-muted-foreground">{payload.source_text}</p>
+              <p className="text-sm leading-relaxed text-muted-foreground italic">"{payload.original_sentence}"</p>
             </div>
           )}
         </div>
@@ -417,13 +338,13 @@ function ExerciseContext({
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Suggested words</p>
               <div className="flex flex-wrap gap-2">
-                {payload.suggested_words.map((entry: { word: string; translation?: string }) => (
+                {(payload.suggested_words as string[]).map((word) => (
                   <Badge
-                    key={typeof entry === "string" ? entry : entry.word}
+                    key={word}
                     variant="outline"
                     className="text-violet-400 border-violet-500/30 bg-violet-500/10 text-xs"
                   >
-                    {typeof entry === "string" ? entry : `${entry.word}${entry.translation ? ` (${entry.translation})` : ""}`}
+                    {word}
                   </Badge>
                 ))}
               </div>
@@ -444,7 +365,7 @@ function ExerciseContext({
 // ---------------------------------------------------------------------------
 
 function CorrectAnswerDisplay({ correct_answer }: { correct_answer: AnswerResult["correct_answer"] }) {
-  const { type, value, target_word, required_words, min_words } = correct_answer;
+  const { type, value } = correct_answer;
 
   if (type === "text_list" && Array.isArray(value)) {
     return (
@@ -453,32 +374,28 @@ function CorrectAnswerDisplay({ correct_answer }: { correct_answer: AnswerResult
       </span>
     );
   }
-  if (type === "text_production") {
+  if (type === "words_included" && Array.isArray(value)) {
     return (
       <span>
-        Must contain: <span className="font-semibold text-foreground">'{target_word}'</span>
-        {min_words != null && <> (min {min_words} words)</>}
+        Required words: <span className="font-semibold text-foreground">{value.join(", ")}</span>
       </span>
     );
   }
-  if (type === "text_production_multi") {
+  if (type === "any_word_included" && Array.isArray(value)) {
     return (
       <span>
-        Required words:{" "}
-        <span className="font-semibold text-foreground">
-          {Array.isArray(required_words) ? required_words.join(", ") : ""}
-        </span>
+        Use any of: <span className="font-semibold text-foreground">{value.join(", ")}</span>
       </span>
     );
   }
-  if (type === "text_production_free") {
+  if (type === "bool") {
     return (
       <span>
-        Min {min_words} words, different from source
+        Answer: <span className="font-semibold text-foreground">{value ? "True" : "False"}</span>
       </span>
     );
   }
-  // default: text
+  // text / word_id / definition_id
   return (
     <span>
       Answer: <span className="font-semibold text-foreground">{String(value)}</span>
@@ -528,16 +445,14 @@ export default function Session() {
   const locationState = location.state as { items: PracticeItem[]; session: PracticeSession } | null;
 
   const [items, setItems] = useState<PracticeItem[]>(locationState?.items ?? []);
-  const [session, setSession] = useState<PracticeSession | null>(locationState?.session ?? null);
+  const [session] = useState<PracticeSession | null>(locationState?.session ?? null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answer, setAnswer] = useState("");
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<AnswerResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const [difficulty, setDifficulty] = useState(1);
   const [results, setResults] = useState<Array<{ is_correct: boolean }>>([]);
-  const [showRedacted, setShowRedacted] = useState(false);
 
   // Fetch items if not provided via location state
   const { isLoading } = useQuery({
@@ -551,14 +466,6 @@ export default function Session() {
   });
 
   const currentItem = items[currentIndex] as PracticeItem | undefined;
-
-  // Stable redacted sentence for whisper_challenge (recalculate only on item/difficulty change)
-  const redactedSentence = useMemo(() => {
-    if (!currentItem || currentItem.exercise_type !== "whisper_challenge") return "";
-    const targetWord = currentItem.payload.target_word ?? currentItem.payload.word ?? "";
-    return redactForDifficulty(currentItem.prompt, targetWord, difficulty);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex, difficulty]);
 
   // Word rivals countdown timer
   useEffect(() => {
@@ -613,9 +520,7 @@ export default function Session() {
       setAnswer("");
       setSelectedOption(null);
       setFeedback(null);
-      setDifficulty(1);
       setTimeLeft(null);
-      setShowRedacted(false);
     }
   }
 
@@ -795,14 +700,7 @@ export default function Session() {
             </div>
 
             {/* Exercise context */}
-            <ExerciseContext
-              item={currentItem}
-              difficulty={difficulty}
-              onDifficultyChange={setDifficulty}
-              redactedSentence={redactedSentence}
-              showRedacted={showRedacted}
-              onToggleRedacted={() => setShowRedacted((v) => !v)}
-            />
+            <ExerciseContext item={currentItem} />
 
             {/* Input area — hidden after feedback */}
             {!feedback && inputType !== "none" && (

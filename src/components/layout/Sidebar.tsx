@@ -3,13 +3,13 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   Home,
   BookOpen,
-  Film,
   PenTool,
   User,
   ChevronLeft,
   ChevronRight,
   Sparkles,
-  Library
+  Library,
+  Dumbbell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +17,7 @@ const navItems = [
   { icon: Home, label: "Home", path: "/" },
   { icon: BookOpen, label: "Dictionary", path: "/vocabulary" },
   { icon: Library, label: "Saved Words", path: "/saved-words" },
+  { icon: Dumbbell, label: "Practice", path: "/practice" },
   { icon: PenTool, label: "Writing Lab", path: "/writing" },
   { icon: User, label: "Profile", path: "/profile" },
 ];

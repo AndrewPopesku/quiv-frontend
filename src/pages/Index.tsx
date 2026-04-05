@@ -4,12 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { WordOfTheDay } from "@/components/dashboard/WordOfTheDay";
-import { CinemaPreview } from "@/components/dashboard/CinemaPreview";
 import { StreakCard } from "@/components/dashboard/StreakCard";
 import { RecentWords } from "@/components/dashboard/RecentWords";
-import { BookOpen, Target, Book } from "lucide-react";
-import { EXERCISES } from "@/data/exercises";
-import { ExerciseCard } from "@/components/dashboard/ExerciseCard";
+import { BookOpen, Target, Dumbbell, ArrowRight } from "lucide-react";
 import { ActivityService } from "@/api";
 
 const Index = () => {
@@ -54,21 +51,27 @@ const Index = () => {
         />
       </div>
 
-      {/* Exercise Selection Area */}
+      {/* Practice CTA */}
       <div className="mb-12 fade-in" style={{ animationDelay: '100ms' }}>
-        <h2 className="text-2xl font-bold text-foreground mb-8 flex items-center gap-3">
-          <Book className="text-primary w-6 h-6" /> Choose an Exercise
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {EXERCISES.map((exercise) => (
-            <ExerciseCard
-              key={exercise.id}
-              exercise={exercise}
-              onClick={() => navigate(exercise.route)}
-            />
-          ))}
-        </div>
+        <button
+          onClick={() => navigate("/practice")}
+          className="glass-card p-6 w-full text-left group hover:border-primary/50 transition-all duration-200 cursor-pointer"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 group-hover:bg-primary/20 transition-colors">
+                <Dumbbell className="w-7 h-7 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
+                  Practice
+                </h3>
+                <p className="text-muted-foreground text-sm">14 AI-powered exercise types — context fill, lyric lab, story weaver, and more.</p>
+              </div>
+            </div>
+            <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+          </div>
+        </button>
       </div>
 
       {/* Remaining Dashboard items */}
