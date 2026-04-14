@@ -37,6 +37,7 @@ export interface PracticeItem {
   prompt: string;
   payload: Record<string, any>;
   options: MCQOption[];
+  correct_answer: { type: string; value: unknown };
   created_at: string;
   answered_at: string | null;
   is_correct: boolean | null;

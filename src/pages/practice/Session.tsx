@@ -1,434 +1,133 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { practiceApi } from "@/services/practiceApi";
 import type { PracticeItem, PracticeSession, AnswerResult } from "@/types/practice";
 import { cn } from "@/lib/utils";
-import {
-  CheckCircle2,
-  XCircle,
-  ChevronRight,
-  Trophy,
-  Loader2,
-  Timer,
-  ArrowLeftRight,
-  Music,
-  Brain,
-  Mic,
-  Shuffle,
-  PenLine,
-  BookOpen,
-  Network,
-  Ghost,
-  Moon,
-  Sparkles,
-  ScanSearch,
-  Film,
-  Zap,
-} from "lucide-react";
+import { Trophy, Loader2, RotateCcw } from "lucide-react";
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Flashcard front — definition clues
 // ---------------------------------------------------------------------------
 
+function CardFront({
+  item,
+  onReveal,
+}: {
+  item: PracticeItem;
+  onReveal: () => void;
+}) {
+  const { prompt, payload } = item;
 
-function exerciseLabel(type: string): string {
-  const map: Record<string, string> = {
-    context_fill: "Context Roulette",
-    sentence_forge: "Sentence Forge",
-    lyric_lab: "Lyric Lab",
-    scene_detective: "Scene Detective",
-    word_rivals: "Word Rivals",
-    story_weaver: "Story Weaver",
-    whisper_challenge: "Whisper Challenge",
-    memory_palace: "Memory Palace",
-    duo_duel: "Duo Duel",
-    scenario_immersion: "AI Scenario",
-    vocab_archaeology: "Vocab Archaeology",
-    word_network: "Word Network",
-    ghost_writer: "Ghost Writer",
-    dream_journal: "Dream Journal",
-  };
-  return map[type] ?? type;
-}
-
-function exerciseIcon(type: string) {
-  const map: Record<string, React.ReactNode> = {
-    context_fill: <Shuffle className="w-4 h-4" />,
-    sentence_forge: <PenLine className="w-4 h-4" />,
-    lyric_lab: <Music className="w-4 h-4" />,
-    scene_detective: <Film className="w-4 h-4" />,
-    word_rivals: <Zap className="w-4 h-4" />,
-    story_weaver: <BookOpen className="w-4 h-4" />,
-    whisper_challenge: <Mic className="w-4 h-4" />,
-    memory_palace: <Brain className="w-4 h-4" />,
-    duo_duel: <ArrowLeftRight className="w-4 h-4" />,
-    scenario_immersion: <Sparkles className="w-4 h-4" />,
-    vocab_archaeology: <ScanSearch className="w-4 h-4" />,
-    word_network: <Network className="w-4 h-4" />,
-    ghost_writer: <Ghost className="w-4 h-4" />,
-    dream_journal: <Moon className="w-4 h-4" />,
-  };
-  return map[type] ?? null;
-}
-
-function exerciseBadgeColor(type: string): string {
-  const map: Record<string, string> = {
-    context_fill: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    sentence_forge: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-    lyric_lab: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-    scene_detective: "bg-gray-500/20 text-gray-400 border-gray-500/30",
-    word_rivals: "bg-red-500/20 text-red-400 border-red-500/30",
-    story_weaver: "bg-green-500/20 text-green-400 border-green-500/30",
-    whisper_challenge: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
-    memory_palace: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    duo_duel: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-    scenario_immersion: "bg-pink-500/20 text-pink-400 border-pink-500/30",
-    vocab_archaeology: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    word_network: "bg-teal-500/20 text-teal-400 border-teal-500/30",
-    ghost_writer: "bg-slate-500/20 text-slate-400 border-slate-500/30",
-    dream_journal: "bg-violet-500/20 text-violet-400 border-violet-500/30",
-  };
-  return map[type] ?? "bg-muted text-muted-foreground border-border";
-}
-
-function roundTypeBadgeColor(roundType: string): string {
-  const map: Record<string, string> = {
-    speed_translation: "bg-red-500/20 text-red-400 border-red-500/30",
-    context_clash: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    reverse_challenge: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-    spelling_showdown: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  };
-  return map[roundType] ?? "bg-muted text-muted-foreground border-border";
-}
-
-// ---------------------------------------------------------------------------
-// Sub-components
-// ---------------------------------------------------------------------------
-
-function ExerciseContext({ item }: { item: PracticeItem }) {
-  const { exercise_type, prompt, payload } = item;
-
-  switch (exercise_type) {
-    case "context_fill":
-      return (
-        <div className="space-y-3">
-          <p className="text-xl font-medium leading-relaxed text-foreground">{prompt}</p>
-          {payload.translation_hint && (
-            <span className="text-sm text-muted-foreground italic">{payload.translation_hint}</span>
-          )}
-        </div>
-      );
-
-    case "sentence_forge":
-      return (
-        <div className="space-y-4">
-          {payload.situational_prompt && (
-            <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/20">
-              <p className="text-sm text-muted-foreground leading-relaxed">{payload.situational_prompt}</p>
-            </div>
-          )}
-          {Array.isArray(payload.required_words) && payload.required_words.length > 0 && (
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Required words</p>
-              <div className="flex flex-wrap gap-2">
-                {payload.required_words.map((w: string) => (
-                  <Badge key={w} variant="outline" className="text-orange-400 border-orange-500/30 bg-orange-500/10 font-mono">
-                    {w}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      );
-
-    case "lyric_lab":
-      return (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-purple-400">
-            <Music className="w-5 h-5" />
-            {payload.song_title && (
-              <span className="text-sm font-medium">
-                {payload.song_title}{payload.artist ? ` — ${payload.artist}` : ""}
-              </span>
-            )}
-          </div>
-          <p className="text-xl font-medium leading-relaxed text-foreground font-mono">{prompt}</p>
-        </div>
-      );
-
-    case "scene_detective":
-      return (
-        <div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
-          <div className="p-6 rounded-2xl bg-muted/30 border border-border">
-            <Film className="w-16 h-16 text-muted-foreground mx-auto mb-3" />
-            <p className="text-lg font-semibold text-foreground">Scene Detective</p>
-            <p className="text-sm text-muted-foreground mt-1">Coming Soon — video clip exercises are on the way!</p>
-          </div>
-        </div>
-      );
-
-    case "word_rivals": {
-      const roundType: string = payload.round_type ?? "";
-      return (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            {roundType && (
-              <Badge className={cn("text-xs font-semibold border", roundTypeBadgeColor(roundType))}>
-                {roundType.replace(/_/g, " ")}
-              </Badge>
-            )}
-          </div>
-          <p className="text-xl font-medium leading-relaxed text-foreground">{prompt}</p>
-        </div>
-      );
-    }
-
-    case "story_weaver":
-      return (
-        <div className="space-y-4">
-          <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20">
-            <p className="text-base leading-relaxed text-foreground">{payload.story_opening ?? prompt}</p>
-          </div>
-          {Array.isArray(payload.required_words) && payload.required_words.length > 0 && (
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Required words</p>
-              <div className="flex flex-wrap gap-2">
-                {payload.required_words.map((w: string) => (
-                  <Badge key={w} variant="outline" className="text-green-400 border-green-500/30 bg-green-500/10 font-mono">
-                    {w}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      );
-
-    case "whisper_challenge":
-      return (
-        <div className="space-y-4">
-          {payload.translation_hint && (
-            <p className="text-sm text-muted-foreground">
-              Translation: <span className="italic">{payload.translation_hint}</span>
-            </p>
-          )}
-          <div className="p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/20 font-mono text-2xl tracking-widest text-center">
-            {payload.degraded_word ?? prompt}
-          </div>
-          <p className="text-xs text-muted-foreground text-center">Spell the full word</p>
-        </div>
-      );
-
-    case "memory_palace":
-      return (
-        <div className="space-y-4">
-          <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 space-y-2">
-            {payload.room && (
-              <p className="text-sm text-muted-foreground">
-                Room: <span className="font-semibold text-foreground">{payload.room}</span>
-              </p>
-            )}
-            {payload.object && (
-              <p className="text-sm text-muted-foreground">
-                Object: <span className="font-semibold text-foreground">{payload.object}</span>
-              </p>
-            )}
-          </div>
-          {payload.mnemonic_hint && (
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/30 border border-border">
-              <Brain className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-              <p className="text-sm italic text-muted-foreground">{payload.mnemonic_hint}</p>
-            </div>
-          )}
-          <p className="text-xl font-medium text-foreground">{prompt}</p>
-        </div>
-      );
-
-    case "duo_duel": {
-      // Backend sends "l1_to_l2" or "l2_to_l1"
-      const direction: string = payload.direction ?? "l1_to_l2";
-      return (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <ArrowLeftRight className="w-4 h-4 text-cyan-400" />
-            <span className="text-sm text-muted-foreground">
-              {direction === "l1_to_l2" ? "Translation → Term" : "Term → Translation"}
-            </span>
-          </div>
-          <p className="text-3xl font-bold text-foreground">{prompt}</p>
-        </div>
-      );
-    }
-
-    case "scenario_immersion":
-      return (
-        <div className="space-y-4">
-          {payload.scenario && (
-            <div className="p-4 rounded-xl bg-pink-500/5 border border-pink-500/20">
-              <p className="text-sm text-muted-foreground leading-relaxed">{payload.scenario}</p>
-            </div>
-          )}
-          {Array.isArray(payload.required_words) && payload.required_words.length > 0 && (
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Required words</p>
-              <div className="flex flex-wrap gap-2">
-                {payload.required_words.map((w: string) => (
-                  <Badge key={w} variant="outline" className="text-pink-400 border-pink-500/30 bg-pink-500/10 font-mono text-xs">
-                    {w}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      );
-
-    case "vocab_archaeology":
-      return (
-        <div className="space-y-3">
-          <div className="p-4 rounded-xl bg-yellow-500/5 border border-yellow-500/20 font-mono text-sm leading-relaxed whitespace-pre-wrap">
-            {payload.redacted_text ?? prompt}
-          </div>
-          {payload.part_of_speech && (
-            <p className="text-sm text-muted-foreground">
-              Part of speech: <span className="italic">{payload.part_of_speech}</span>
-            </p>
-          )}
-        </div>
-      );
-
-    case "word_network":
-      return (
-        <div className="space-y-3">
-          <p className="text-base text-foreground">{prompt}</p>
-          {Array.isArray(payload.all_synonyms) && payload.all_synonyms.length > 0 && (
-            <div className="text-sm text-muted-foreground">
-              Hint — related: {(payload.all_synonyms as string[]).slice(0, 2).join(", ")}…
-            </div>
-          )}
-        </div>
-      );
-
-    case "ghost_writer":
-      return (
-        <div className="space-y-4">
-          <p className="text-base font-medium text-foreground">{prompt}</p>
-          {payload.original_sentence && (
-            <div className="p-4 rounded-xl bg-muted/20 border border-border/60">
-              <p className="text-sm leading-relaxed text-muted-foreground italic">"{payload.original_sentence}"</p>
-            </div>
-          )}
-        </div>
-      );
-
-    case "dream_journal":
-      return (
-        <div className="space-y-4">
-          <p className="text-xl font-medium text-foreground leading-relaxed">{prompt}</p>
-          {Array.isArray(payload.suggested_words) && payload.suggested_words.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Suggested words</p>
-              <div className="flex flex-wrap gap-2">
-                {(payload.suggested_words as string[]).map((word) => (
-                  <Badge
-                    key={word}
-                    variant="outline"
-                    className="text-violet-400 border-violet-500/30 bg-violet-500/10 text-xs"
-                  >
-                    {word}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      );
-
-    default:
-      return (
-        <p className="text-xl font-medium text-foreground leading-relaxed">{prompt}</p>
-      );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Feedback correct_answer display
-// ---------------------------------------------------------------------------
-
-function CorrectAnswerDisplay({ correct_answer }: { correct_answer: AnswerResult["correct_answer"] }) {
-  const { type, value } = correct_answer;
-
-  if (type === "text_list" && Array.isArray(value)) {
-    return (
-      <span>
-        Answer: <span className="font-semibold text-foreground">{value.join(" / ")}</span>
-      </span>
-    );
-  }
-  if (type === "words_included" && Array.isArray(value)) {
-    return (
-      <span>
-        Required words: <span className="font-semibold text-foreground">{value.join(", ")}</span>
-      </span>
-    );
-  }
-  if (type === "any_word_included" && Array.isArray(value)) {
-    return (
-      <span>
-        Use any of: <span className="font-semibold text-foreground">{value.join(", ")}</span>
-      </span>
-    );
-  }
-  if (type === "bool") {
-    return (
-      <span>
-        Answer: <span className="font-semibold text-foreground">{value ? "True" : "False"}</span>
-      </span>
-    );
-  }
-  // text / word_id / definition_id
   return (
-    <span>
-      Answer: <span className="font-semibold text-foreground">{String(value)}</span>
-    </span>
+    <div
+      onClick={onReveal}
+      className="glass-card p-8 space-y-6 min-h-[280px] flex flex-col cursor-pointer hover:border-primary/40 transition-colors select-none"
+    >
+      <div className="flex-1 space-y-4">
+        {payload.part_of_speech && (
+          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 border text-xs">
+            {payload.part_of_speech}
+          </Badge>
+        )}
+        <p className="text-xl font-medium text-foreground leading-relaxed">{prompt}</p>
+      </div>
+
+      <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+        <RotateCcw className="w-3 h-3" />
+        tap to reveal
+      </div>
+    </div>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Timer display
+// Flashcard back — word reveal + self-rating
 // ---------------------------------------------------------------------------
 
-function TimerDisplay({ timeLeft }: { timeLeft: number }) {
-  const pct = (timeLeft / 30) * 100;
-  const color =
-    timeLeft > 15
-      ? "text-green-400"
-      : timeLeft > 8
-      ? "text-yellow-400"
-      : "text-red-400";
+function CardBack({
+  item,
+  result,
+  isSubmitting,
+  onRate,
+  onNext,
+  isLastItem,
+  onFlipBack,
+}: {
+  item: PracticeItem;
+  result: AnswerResult | null;
+  isSubmitting: boolean;
+  onRate: (knew: boolean) => void;
+  onNext: () => void;
+  isLastItem: boolean;
+  onFlipBack: () => void;
+}) {
+  const { payload, correct_answer } = item;
+  const word = String((correct_answer as any)?.value ?? "");
 
   return (
-    <div className="flex items-center gap-2">
-      <Timer className={cn("w-4 h-4", color)} />
-      <span className={cn("text-sm font-bold tabular-nums", color)}>{timeLeft}s</span>
-      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
-        <div
-          className={cn(
-            "h-full rounded-full transition-all duration-1000",
-            timeLeft > 15 ? "bg-green-400" : timeLeft > 8 ? "bg-yellow-400" : "bg-red-400"
-          )}
-          style={{ width: `${pct}%` }}
-        />
+    <div
+      onClick={!result ? onFlipBack : undefined}
+      className={cn(
+        "glass-card p-8 space-y-6 min-h-[280px] flex flex-col select-none",
+        !result && "cursor-pointer hover:border-primary/40 transition-colors"
+      )}
+    >
+      {/* The word */}
+      <div className="flex-1 space-y-4">
+        <div className="text-center py-2">
+          <p className="text-4xl font-bold text-foreground">{word}</p>
+        </div>
+
+        {/* Example sentence */}
+        {payload.example_sentence && (
+          <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
+            <p className="text-sm text-muted-foreground leading-relaxed italic">
+              {payload.example_sentence}
+            </p>
+          </div>
+        )}
       </div>
+
+      {/* Self-rating or mastery + next */}
+      {!result ? (
+        <div className="grid grid-cols-2 gap-3" onClick={(e) => e.stopPropagation()}>
+          <Button
+            variant="outline"
+            onClick={() => onRate(false)}
+            disabled={isSubmitting}
+            className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+          >
+            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Didn't know"}
+          </Button>
+          <Button
+            onClick={() => onRate(true)}
+            disabled={isSubmitting}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Knew it"}
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Mastery</span>
+              <span className="font-semibold text-foreground">{result.mastery}%</span>
+            </div>
+            <Progress value={result.mastery} className="h-2" />
+          </div>
+
+          <Button onClick={onNext} className="w-full">
+            {isLastItem ? "Finish" : "Next →"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -447,14 +146,11 @@ export default function Session() {
   const [items, setItems] = useState<PracticeItem[]>(locationState?.items ?? []);
   const [session] = useState<PracticeSession | null>(locationState?.session ?? null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answer, setAnswer] = useState("");
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<AnswerResult | null>(null);
+  const [isFlipped, setIsFlipped] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [result, setResult] = useState<AnswerResult | null>(null);
   const [results, setResults] = useState<Array<{ is_correct: boolean }>>([]);
 
-  // Fetch items if not provided via location state
   const { isLoading } = useQuery({
     queryKey: ["practiceItems", sessionId],
     queryFn: async () => {
@@ -467,46 +163,23 @@ export default function Session() {
 
   const currentItem = items[currentIndex] as PracticeItem | undefined;
 
-  // Word rivals countdown timer
-  useEffect(() => {
-    if (!currentItem || currentItem.exercise_type !== "word_rivals" || feedback) return;
-    setTimeLeft(30);
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev === null || prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex]);
+  function handleReveal() {
+    setIsFlipped(true);
+  }
 
-  // Auto-submit when word_rivals timer hits 0
-  useEffect(() => {
-    if (timeLeft === 0 && !feedback && currentItem?.exercise_type === "word_rivals") {
-      handleSubmit();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeLeft]);
-
-  async function handleSubmit() {
+  async function handleRate(knew: boolean) {
     if (isSubmitting || !currentItem) return;
-
-    let answerValue: unknown = answer;
-    if (currentItem.options.length > 0) {
-      answerValue = selectedOption;
-    }
-
+    const word = String((currentItem.correct_answer as any)?.value ?? "");
+    const answer = knew ? word : "";
     setIsSubmitting(true);
     try {
-      const res = await practiceApi.submitAnswer(currentItem.id, answerValue);
-      setFeedback(res.data);
+      const res = await practiceApi.submitAnswer(currentItem.id, answer);
+      setResult(res.data);
       setResults((prev) => [...prev, { is_correct: res.data.is_correct }]);
     } catch {
-      // silently fail
+      // silently fail — advance anyway
+      setResults((prev) => [...prev, { is_correct: knew }]);
+      setResult({ is_correct: knew, correct_answer: { type: "text", value: word }, mastery: 0 });
     } finally {
       setIsSubmitting(false);
     }
@@ -517,40 +190,13 @@ export default function Session() {
       setCurrentIndex(items.length);
     } else {
       setCurrentIndex((prev) => prev + 1);
-      setAnswer("");
-      setSelectedOption(null);
-      setFeedback(null);
-      setTimeLeft(null);
+      setIsFlipped(false);
+      setResult(null);
     }
   }
 
   const isLastItem = currentIndex === items.length - 1;
-
-  // Decide input type
-  function getInputType(): "short" | "long" | "mcq" | "none" {
-    if (!currentItem) return "none";
-    const { exercise_type, options } = currentItem;
-    if (exercise_type === "scene_detective") return "none";
-    if (options.length > 0) return "mcq";
-    const longTypes = [
-      "sentence_forge",
-      "story_weaver",
-      "scenario_immersion",
-      "ghost_writer",
-      "dream_journal",
-    ];
-    if (exercise_type === "duo_duel") {
-      const direction = currentItem.payload.direction ?? "to_translation";
-      return direction === "to_translation" ? "long" : "short";
-    }
-    return longTypes.includes(exercise_type) ? "long" : "short";
-  }
-
-  const submitDisabled =
-    isSubmitting ||
-    (currentItem?.exercise_type !== "scene_detective" &&
-      !answer.trim() &&
-      !selectedOption);
+  const progressPct = items.length > 0 ? (currentIndex / items.length) * 100 : 0;
 
   // -------------------------------------------------------------------------
   // Results screen
@@ -577,9 +223,6 @@ export default function Session() {
 
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">Session Complete!</h1>
-              <p className="text-muted-foreground">
-                {session ? `Mode: ${session.mode.replace(/_/g, " ")}` : "Great work!"}
-              </p>
             </div>
 
             <div className="space-y-3">
@@ -587,7 +230,7 @@ export default function Session() {
                 {correct}
                 <span className="text-muted-foreground text-3xl"> / {total}</span>
               </p>
-              <p className="text-muted-foreground">correct</p>
+              <p className="text-muted-foreground">knew it</p>
             </div>
 
             <div className="space-y-2">
@@ -608,7 +251,7 @@ export default function Session() {
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button variant="outline" className="flex-1" onClick={() => navigate("/practice")}>
-                Review Mistakes
+                Back to Practice
               </Button>
               <Button className="flex-1" onClick={() => navigate("/practice")}>
                 Practice Again
@@ -635,28 +278,20 @@ export default function Session() {
 
   if (!currentItem) return null;
 
-  const inputType = getInputType();
-  const progressPct = items.length > 0 ? (currentIndex / items.length) * 100 : 0;
-
   return (
     <Layout>
       <div className="max-w-2xl mx-auto px-4 py-6">
         <div className="space-y-6">
-          {/* Progress section */}
+          {/* Progress */}
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>
-                {currentIndex + 1} / {items.length}
-              </span>
+              <span>{currentIndex + 1} / {items.length}</span>
               <span>{Math.round(progressPct)}% complete</span>
             </div>
-
             <Progress value={progressPct} className="h-2" />
-
-            {/* Dots row */}
             <div className="flex gap-1.5 flex-wrap">
               {items.map((_, i) => {
-                const result = results[i];
+                const r = results[i];
                 const isCurrent = i === currentIndex;
                 return (
                   <div
@@ -666,9 +301,9 @@ export default function Session() {
                       items.length <= 20 ? "w-full flex-1" : "w-2",
                       isCurrent
                         ? "bg-yellow-400"
-                        : result === undefined
+                        : r === undefined
                         ? "bg-muted"
-                        : result.is_correct
+                        : r.is_correct
                         ? "bg-green-500"
                         : "bg-red-500"
                     )}
@@ -678,159 +313,38 @@ export default function Session() {
             </div>
           </div>
 
-          {/* Exercise card */}
-          <div className="glass-card p-6 space-y-6">
-            {/* Exercise type badge + timer */}
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-              <Badge
-                className={cn(
-                  "flex items-center gap-1.5 border text-xs font-medium",
-                  exerciseBadgeColor(currentItem.exercise_type)
-                )}
+          {/* Flashcard with flip animation */}
+          <AnimatePresence mode="wait" initial={false}>
+            {!isFlipped ? (
+              <motion.div
+                key="front"
+                initial={{ rotateY: -90, opacity: 0 }}
+                animate={{ rotateY: 0, opacity: 1 }}
+                exit={{ rotateY: 90, opacity: 0 }}
+                transition={{ duration: 0.2 }}
               >
-                {exerciseIcon(currentItem.exercise_type)}
-                {exerciseLabel(currentItem.exercise_type)}
-              </Badge>
-
-              {currentItem.exercise_type === "word_rivals" && timeLeft !== null && !feedback && (
-                <div className="flex-1 min-w-[120px] max-w-[200px]">
-                  <TimerDisplay timeLeft={timeLeft} />
-                </div>
-              )}
-            </div>
-
-            {/* Exercise context */}
-            <ExerciseContext item={currentItem} />
-
-            {/* Input area — hidden after feedback */}
-            {!feedback && inputType !== "none" && (
-              <div className="space-y-3">
-                {inputType === "short" && (
-                  <Input
-                    value={answer}
-                    onChange={(e) => setAnswer(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && !feedback && handleSubmit()}
-                    placeholder="Type your answer…"
-                    autoFocus
-                    disabled={isSubmitting}
-                  />
-                )}
-
-                {inputType === "long" && (
-                  <Textarea
-                    rows={4}
-                    value={answer}
-                    onChange={(e) => setAnswer(e.target.value)}
-                    placeholder="Write your answer…"
-                    autoFocus
-                    disabled={isSubmitting}
-                  />
-                )}
-
-                {inputType === "mcq" && (
-                  <div className="space-y-2">
-                    {currentItem.options.map((opt) => (
-                      <button
-                        key={opt.id}
-                        onClick={() => setSelectedOption(String(opt.id))}
-                        disabled={isSubmitting}
-                        className={cn(
-                          "w-full p-4 rounded-xl border text-left transition-all text-sm",
-                          selectedOption === String(opt.id)
-                            ? "border-primary bg-primary/10"
-                            : "border-border hover:border-primary/50 bg-transparent"
-                        )}
-                      >
-                        {opt.text}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Submit button */}
-            {!feedback && (
-              <Button
-                onClick={handleSubmit}
-                disabled={submitDisabled}
-                className="w-full"
+                <CardFront item={currentItem} onReveal={handleReveal} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="back"
+                initial={{ rotateY: -90, opacity: 0 }}
+                animate={{ rotateY: 0, opacity: 1 }}
+                exit={{ rotateY: 90, opacity: 0 }}
+                transition={{ duration: 0.2 }}
               >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Checking…
-                  </>
-                ) : currentItem.exercise_type === "scene_detective" ? (
-                  "Skip"
-                ) : (
-                  "Submit"
-                )}
-              </Button>
+                <CardBack
+                  item={currentItem}
+                  result={result}
+                  isSubmitting={isSubmitting}
+                  onRate={handleRate}
+                  onNext={handleNext}
+                  isLastItem={isLastItem}
+                  onFlipBack={() => setIsFlipped(false)}
+                />
+              </motion.div>
             )}
-
-            {/* Feedback panel */}
-            <AnimatePresence>
-              {feedback && (
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 16 }}
-                  transition={{ duration: 0.25 }}
-                  className="space-y-4"
-                >
-                  {/* Correct / incorrect header */}
-                  <div
-                    className={cn(
-                      "flex items-center gap-3 p-4 rounded-xl border",
-                      feedback.is_correct
-                        ? "bg-green-500/10 border-green-500/30"
-                        : "bg-red-500/10 border-red-500/30"
-                    )}
-                  >
-                    {feedback.is_correct ? (
-                      <CheckCircle2 className="w-6 h-6 text-green-400 flex-shrink-0" />
-                    ) : (
-                      <XCircle className="w-6 h-6 text-red-400 flex-shrink-0" />
-                    )}
-                    <div>
-                      <p
-                        className={cn(
-                          "font-bold",
-                          feedback.is_correct ? "text-green-400" : "text-red-400"
-                        )}
-                      >
-                        {feedback.is_correct ? "Correct! +7 mastery" : "Incorrect"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Correct answer card */}
-                  <div className="p-4 rounded-xl bg-muted/30 border border-border text-sm text-muted-foreground">
-                    <CorrectAnswerDisplay correct_answer={feedback.correct_answer} />
-                  </div>
-
-                  {/* Mastery bar */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Mastery</span>
-                      <span className="font-semibold text-foreground">{feedback.mastery}%</span>
-                    </div>
-                    <Progress value={feedback.mastery} className="h-2" />
-                  </div>
-
-                  {/* Next / Finish button */}
-                  <Button onClick={handleNext} className="w-full">
-                    {isLastItem ? "Finish" : (
-                      <>
-                        Next <ChevronRight className="w-4 h-4 ml-1" />
-                      </>
-                    )}
-                  </Button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          </AnimatePresence>
         </div>
       </div>
     </Layout>
