@@ -17,6 +17,7 @@ import SavedWordDetail from "./pages/SavedWordDetail";
 import Profile from "./pages/Profile";
 import PracticeHub from "./pages/practice/Hub";
 import PracticeSession from "./pages/practice/Session";
+import SentenceForge from "./pages/exercises/SentenceForge";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 // import "./index.css";
@@ -57,6 +58,7 @@ function AppRoutes() {
       <Route path="/saved-words/:id" element={<SavedWordDetail />} />
       <Route path="/practice" element={<PracticeHub />} />
       <Route path="/practice/session/:sessionId" element={<PracticeSession />} />
+      <Route path="/exercises/sentence-forge" element={<SentenceForge />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

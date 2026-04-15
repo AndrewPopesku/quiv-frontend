@@ -4,6 +4,10 @@ import type {
   SessionWithItems,
   PracticeItem,
   AnswerResult,
+  SentenceForgeStartResponse,
+  SentenceForgeHintResponse,
+  SentenceForgeEvaluation,
+  SentenceForgeSessionSummary,
 } from "@/types/practice";
 
 function auth() {
@@ -26,6 +30,35 @@ export const practiceApi = {
     axios.post<AnswerResult>(
       `/api/practice/items/${itemId}/answer/`,
       { answer },
+      { headers: auth() },
+    ),
+
+  // Sentence Forge
+  sentenceForgeStart: (language: string) =>
+    axios.post<SentenceForgeStartResponse>(
+      "/api/practice/sentence-forge/start/",
+      { language },
+      { headers: auth() },
+    ),
+
+  sentenceForgeHint: (sessionId: number, hintType: string) =>
+    axios.post<SentenceForgeHintResponse>(
+      `/api/practice/sentence-forge/${sessionId}/hint/`,
+      { hint_type: hintType },
+      { headers: auth() },
+    ),
+
+  sentenceForgeSubmit: (sessionId: number, sentence: string) =>
+    axios.post<SentenceForgeEvaluation>(
+      `/api/practice/sentence-forge/${sessionId}/submit/`,
+      { sentence },
+      { headers: auth() },
+    ),
+
+  sentenceForgeEnd: (sessionId: number) =>
+    axios.post<{ session_summary: SentenceForgeSessionSummary }>(
+      `/api/practice/sentence-forge/${sessionId}/end/`,
+      {},
       { headers: auth() },
     ),
 };

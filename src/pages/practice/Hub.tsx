@@ -15,7 +15,7 @@ import { Slider } from "@/components/ui/slider";
 import { toast } from "@/components/ui/use-toast";
 import { practiceApi } from "@/services/practiceApi";
 import type { CreateSessionPayload } from "@/types/practice";
-import { Layers, Loader2 } from "lucide-react";
+import { Layers, Loader2, Sword } from "lucide-react";
 
 export default function Hub() {
   const navigate = useNavigate();
@@ -46,7 +46,8 @@ export default function Hub() {
         <p className="text-muted-foreground text-lg">Sharpen your vocabulary with flashcard exercises.</p>
       </div>
 
-      <div className="max-w-sm fade-in" style={{ animationDelay: "50ms" }}>
+      <div className="grid sm:grid-cols-2 gap-4 max-w-2xl fade-in" style={{ animationDelay: "50ms" }}>
+        {/* Flashcards */}
         <button
           onClick={() => setDialogOpen(true)}
           className="glass-card p-6 text-left w-full group hover:border-blue-500/50 transition-all duration-200 cursor-pointer"
@@ -61,6 +62,26 @@ export default function Hub() {
               </h3>
               <p className="text-muted-foreground text-sm">
                 Study your words with flashcards. See the definition, flip to reveal the word.
+              </p>
+            </div>
+          </div>
+        </button>
+
+        {/* Sentence Forge */}
+        <button
+          onClick={() => navigate("/exercises/sentence-forge")}
+          className="glass-card p-6 text-left w-full group hover:border-secondary/50 transition-all duration-200 cursor-pointer"
+        >
+          <div className="flex items-start gap-4">
+            <div className="p-3 rounded-xl bg-secondary/10 border border-secondary/20 group-hover:bg-secondary/20 transition-colors">
+              <Sword className="w-7 h-7 text-secondary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-secondary transition-colors">
+                Sentence Forge
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                Build sentences from your vocabulary. AI scores grammar, naturalness, and context fit.
               </p>
             </div>
           </div>

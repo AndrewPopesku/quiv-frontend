@@ -66,3 +66,73 @@ export interface SessionWithItems {
   session: PracticeSession;
   items: PracticeItem[];
 }
+
+// ---------------------------------------------------------------------------
+// Sentence Forge types
+// ---------------------------------------------------------------------------
+
+export interface SentenceForgeTargetWord {
+  id: number;
+  word: string;
+  definition: string;
+  part_of_speech: string;
+}
+
+export interface SentenceForgeItem {
+  item_id: number;
+  prompt: string;
+  target_words: SentenceForgeTargetWord[];
+  hints_available: string[];
+}
+
+export interface GrammarError {
+  span: [number, number];
+  original: string;
+  correction: string;
+  error_type: string;
+  explanation: string;
+}
+
+export interface WordUsageDetail {
+  word: string;
+  used: boolean;
+  correct_sense: boolean;
+  form_used: string;
+  notes: string;
+}
+
+export interface NaturalnessNote {
+  span: [number, number];
+  issue: string;
+  suggestion: string;
+}
+
+export interface SentenceForgeEvaluation {
+  grammar: { score: number; errors: GrammarError[] };
+  vocabulary: { score: number; word_usage: WordUsageDetail[] };
+  naturalness: { score: number; notes: NaturalnessNote[] };
+  context: { score: number; notes: string };
+  native_version: { text: string; notes: string };
+  next_sentence?: SentenceForgeItem;
+  session_complete?: boolean;
+}
+
+export interface SentenceForgeStartResponse {
+  session_id: number;
+  difficulty: string;
+  sentence: SentenceForgeItem;
+}
+
+export interface SentenceForgeHintResponse {
+  hint: string;
+}
+
+export interface SentenceForgeSessionSummary {
+  sentences_completed: number;
+  avg_grammar: number;
+  avg_naturalness: number;
+  avg_vocabulary: number;
+  avg_context: number;
+  words_reviewed: string[];
+  difficulty: string;
+}
