@@ -9,6 +9,8 @@ services:
     build:
       context: ../levise-backend
       dockerfile: Dockerfile
+    volumes:
+      - ../levise-backend:/app
     ports:
       - "8002:8000"
     env_file:
@@ -19,30 +21,37 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/
       - CELERY_RESULT_BACKEND=redis://redis:6379/
     command: >
-      sh -c "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --workers 3 levise_service.wsgi:application"
+      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     depends_on:
       - redis
-    restart: unless-stopped
 
   celery-worker:
     build:
       context: ../levise-backend
       dockerfile: Dockerfile
+    volumes:
+      - ../levise-backend:/app
     env_file:
       - ../levise-backend/.env
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/
       - CELERY_RESULT_BACKEND=redis://redis:6379/
-    command: celery -A levise_service worker --loglevel=info
+    command: >
+      watchmedo auto-restart
+        --directory=.
+        --pattern=*.py
+        --recursive
+        -- celery -A levise_service worker --loglevel=info
     depends_on:
       - redis
       - backend
-    restart: unless-stopped
 
   celery-beat:
     build:
       context: ../levise-backend
       dockerfile: Dockerfile
+    volumes:
+      - ../levise-backend:/app
     env_file:
       - ../levise-backend/.env
     environment:
@@ -52,7 +61,6 @@ services:
     depends_on:
       - redis
       - backend
-    restart: unless-stopped
 
   frontend:
     image: oven/bun:latest

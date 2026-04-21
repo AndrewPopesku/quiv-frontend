@@ -26,10 +26,10 @@ export const practiceApi = {
       headers: auth(),
     }),
 
-  submitAnswer: (itemId: number, answer: unknown) =>
+  submitAnswer: (itemId: number, isCorrect: boolean) =>
     axios.post<AnswerResult>(
       `/api/practice/items/${itemId}/answer/`,
-      { answer },
+      { is_correct: isCorrect },
       { headers: auth() },
     ),
 

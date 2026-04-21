@@ -10,8 +10,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import { toast } from "@/components/ui/use-toast";
 import { practiceApi } from "@/services/practiceApi";
 import type { CreateSessionPayload } from "@/types/practice";
@@ -19,7 +17,6 @@ import { Layers, Loader2, Sword } from "lucide-react";
 
 export default function Hub() {
   const navigate = useNavigate();
-  const [itemsCount, setItemsCount] = useState(10);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const createSessionMutation = useMutation({
@@ -36,7 +33,7 @@ export default function Hub() {
   });
 
   const handleStart = () => {
-    createSessionMutation.mutate({ mode: "context_fill", items_count: itemsCount });
+    createSessionMutation.mutate({ mode: "context_fill" });
   };
 
   return (
@@ -96,26 +93,6 @@ export default function Hub() {
               Study your words with flashcards. See the definition, flip to reveal the word.
             </p>
           </DialogHeader>
-
-          <div className="space-y-6 py-2">
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">
-                Cards: <span className="text-primary font-bold">{itemsCount}</span>
-              </Label>
-              <Slider
-                min={5}
-                max={20}
-                step={1}
-                value={[itemsCount]}
-                onValueChange={(val) => setItemsCount(val[0] ?? 10)}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>5</span>
-                <span>20</span>
-              </div>
-            </div>
-          </div>
 
           <DialogFooter>
             <Button
