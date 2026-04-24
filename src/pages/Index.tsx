@@ -66,7 +66,7 @@ const Index = () => {
                 <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
                   Practice
                 </h3>
-                <p className="text-muted-foreground text-sm">14 AI-powered exercise types — context fill, lyric lab, story weaver, and more.</p>
+                <p className="text-muted-foreground text-sm">AI-powered exercises to build real fluency — from flashcards to creative writing.</p>
               </div>
             </div>
             <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />

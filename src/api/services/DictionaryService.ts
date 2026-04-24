@@ -172,6 +172,25 @@ export class DictionaryService {
         });
     }
     /**
+     * @param wordPk
+     * @param definitionPk
+     * @returns MovieClip[]
+     * @throws ApiError
+     */
+    public static dictionaryWordsDefinitionsClipsList(
+        wordPk: number,
+        definitionPk: number,
+    ): CancelablePromise<Array<Record<string, any>>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/dictionary/words/{word_pk}/definitions/{definition_pk}/clips/',
+            path: {
+                'word_pk': wordPk,
+                'definition_pk': definitionPk,
+            },
+        });
+    }
+    /**
      * @param term Term to be looked up
      * @returns WordBasic
      * @throws ApiError

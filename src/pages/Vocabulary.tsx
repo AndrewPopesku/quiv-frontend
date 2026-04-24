@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Layout } from "@/components/layout/Layout";
@@ -11,12 +11,21 @@ import {
   Loader2,
   Check,
   X,
+  RefreshCw,
+  Film,
 } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { DictionaryService } from "@/api";
 import { ApiError } from "@/api/core/ApiError";
 import type { ExtendedWord, WordLookupResponse } from "@/types/vocabulary";
 import { parseExamples } from "@/lib/vocabulary";
+import { MovieClipPlayer } from "@/components/dictionary/MovieClipPlayer";
+
+type ClipWithMeta = {
+  clip: Record<string, any>;
+  meaning: string;
+  partOfSpeech: string;
+};
 
 export default function Vocabulary() {
   const queryClient = useQueryClient();
@@ -25,6 +34,44 @@ export default function Vocabulary() {
   const [activeWord, setActiveWord] = useState<ExtendedWord | null>(null);
   const [savedDefinitionIds, setSavedDefinitionIds] = useState<Set<number>>(new Set());
   const [userWordId, setUserWordId] = useState<number | null>(null);
+  const [clips, setClips] = useState<ClipWithMeta[]>([]);
+  const [clipsLoading, setClipsLoading] = useState(false);
+
+  const fetchClips = useCallback(async (word: ExtendedWord) => {
+    setClipsLoading(true);
+    setClips([]);
+    try {
+      const results = await Promise.all(
+        word.definitions.map(async (def) => {
+          try {
+            const data = await DictionaryService.dictionaryWordsDefinitionsClipsList(word.id, def.id) as any;
+            const list: Record<string, any>[] = Array.isArray(data) ? data : (data.results ?? []);
+            return list.map((c) => ({
+              clip: c,
+              meaning: def.translation,
+              partOfSpeech: def.part_of_speech,
+            }));
+          } catch {
+            return [];
+          }
+        })
+      );
+      const seen = new Set<number>();
+      const all = results.flat().filter(({ clip }) => {
+        if (seen.has(clip.id)) return false;
+        seen.add(clip.id);
+        return true;
+      });
+      setClips([...all].sort(() => Math.random() - 0.5).slice(0, 4));
+    } finally {
+      setClipsLoading(false);
+    }
+  }, []);
+
+  const reshuffleClips = useCallback(async () => {
+    if (!activeWord) return;
+    await fetchClips(activeWord);
+  }, [activeWord, fetchClips]);
 
   const translateMutation = useMutation({
     mutationFn: async (term: string) => {
@@ -50,6 +97,7 @@ export default function Vocabulary() {
       setActiveWord(data);
       setSavedDefinitionIds(new Set(data.saved_definitions));
       setUserWordId(data.user_word_id);
+      fetchClips(data);
     },
   });
 
@@ -175,6 +223,55 @@ export default function Vocabulary() {
       {activeWord && (
         <div className="fade-in" style={{ animationDelay: '100ms' }}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            {/* Right Column: Video Clips */}
+            <div className="order-last lg:col-start-3 lg:sticky lg:top-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <Film className="w-4 h-4 text-primary" />
+                  Clips
+                </h3>
+                {!clipsLoading && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-primary w-8 h-8"
+                    onClick={reshuffleClips}
+                    title="Shuffle clips"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+
+              {clipsLoading && (
+                <div className="flex items-center justify-center py-10">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                </div>
+              )}
+
+              {!clipsLoading && clips.length === 0 && (
+                <div className="glass-card p-6 text-center">
+                  <Film className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No video clips found for this word yet.</p>
+                </div>
+              )}
+
+              {!clipsLoading && clips.length > 0 && (
+                <div className="space-y-4">
+                  {clips.map((item, i) => (
+                    <div key={i} className="glass-card overflow-hidden">
+                      <MovieClipPlayer clip={item.clip} term={activeWord.term} />
+                      <div className="px-3 py-2 border-t border-border/40">
+                        <span className="text-[10px] uppercase font-bold tracking-widest text-primary/70">
+                          {item.partOfSpeech} · {item.meaning}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Left Column: Header + Meanings */}
             <div className="lg:col-span-2 space-y-6">
               {/* Word Header */}

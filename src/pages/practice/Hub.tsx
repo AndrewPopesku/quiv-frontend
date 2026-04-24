@@ -40,7 +40,7 @@ export default function Hub() {
     <Layout>
       <div className="mb-8 fade-in">
         <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">Practice</h1>
-        <p className="text-muted-foreground text-lg">Sharpen your vocabulary with flashcard exercises.</p>
+        <p className="text-muted-foreground text-lg">Sharpen your vocabulary with a variety of exercises.</p>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4 max-w-2xl fade-in" style={{ animationDelay: "50ms" }}>

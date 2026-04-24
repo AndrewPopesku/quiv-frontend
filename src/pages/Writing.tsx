@@ -17,21 +17,28 @@ import { SuggestionCard } from "@/components/writing/SuggestionCard";
 import { TranslationVariation } from "@/components/writing/TranslationVariation";
 import { ImprovementTips } from "@/components/writing/ImprovementTips";
 import type { WritingLabResult } from "@/types/vocabulary";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Writing() {
+    const { user } = useAuth();
     const [text, setText] = useState("");
     const [result, setResult] = useState<WritingLabResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const userLangName = (user?.profile?.user_language as any)?.name as string | undefined;
+    const targetLangName = (user?.profile?.target_language as any)?.name as string | undefined;
 
     const handleAnalyze = async () => {
         if (!text.trim()) return;
 
         setIsLoading(true);
+        setError(null);
         try {
             const response: any = await PracticeService.practiceAnalyzeCreate({ text });
 
-            if (response.mode === "analysis") {
+            if (response.mode === "refinement") {
                 const d = response.data;
                 setResult({
                     mode: "analysis",
@@ -52,17 +59,26 @@ export default function Writing() {
                 });
             } else {
                 const d = response.data;
+                const registers = ["FORMAL", "CASUAL", "CREATIVE"] as const;
                 setResult({
                     mode: "translation",
                     data: {
-                        sourceLanguage: d.source_language,
-                        translationNotes: d.translation_notes,
-                        variations: d.variations,
+                        sourceLanguage: userLangName ?? "Your language",
+                        translationNotes: d.translation_notes ?? [],
+                        variations: (d.translation_variations ?? []).map(
+                            (v: any, i: number) => ({
+                                text: v.translation,
+                                description: v.explanation,
+                                register: registers[i] ?? "FORMAL",
+                            })
+                        ),
                     },
                 });
             }
-        } catch {
+        } catch (err: any) {
             setResult(null);
+            const message = err?.body?.error || err?.message || "Something went wrong. Please try again.";
+            setError(message);
         } finally {
             setIsLoading(false);
         }
@@ -74,6 +90,7 @@ export default function Writing() {
     const handleClear = () => {
         setText("");
         setResult(null);
+        setError(null);
     };
 
     const handleCopy = async () => {
@@ -89,7 +106,11 @@ export default function Writing() {
         <Layout>
             <PageHeader
                 title="Writing Lab"
-                description="Smart writing assistance. Enter text in English to improve it, or any other language to translate it."
+                description={
+                    targetLangName && userLangName
+                        ? `Smart writing assistance. Enter text in ${targetLangName} to improve it, or in ${userLangName} to translate it.`
+                        : "Smart writing assistance. Enter text in your target language to improve it, or in your native language to translate it."
+                }
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -168,7 +189,7 @@ export default function Writing() {
                         <div className="space-y-3">
                             <h3 className="font-semibold text-foreground flex items-center gap-2">
                                 <Globe className="w-5 h-5 text-secondary" />
-                                English Variations
+                                {targetLangName ?? "Target Language"} Variations
                             </h3>
 
                             {result.data.variations.map((variation, index) => (
@@ -210,8 +231,19 @@ export default function Writing() {
                         </>
                     )}
 
+                    {/* Error State */}
+                    {!result && error && (
+                        <div className="glass-card p-6 text-center border border-destructive/30">
+                            <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+                            <h3 className="font-semibold text-foreground mb-2">
+                                Analysis Failed
+                            </h3>
+                            <p className="text-sm text-muted-foreground">{error}</p>
+                        </div>
+                    )}
+
                     {/* Empty State */}
-                    {!result && (
+                    {!result && !error && (
                         <div className="glass-card p-6 text-center">
                             <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                             <h3 className="font-semibold text-foreground mb-2">
