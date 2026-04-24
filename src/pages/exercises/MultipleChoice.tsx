@@ -9,7 +9,7 @@ import { DictionaryService } from "@/api";
 interface ExerciseWord {
     id: string;
     term: string;
-    phonetic: string;
+    pronunciation: string;
     definitions: Array<{ text: string }>;
 }
 
@@ -29,7 +29,7 @@ export default function MultipleChoice() {
                     return {
                         id: String(uw.word.id),
                         term: uw.word.term,
-                        phonetic: uw.word.phonetic,
+                        pronunciation: uw.word.pronunciation,
                         definitions: [{ text: def.translation ?? "" }],
                     };
                 })

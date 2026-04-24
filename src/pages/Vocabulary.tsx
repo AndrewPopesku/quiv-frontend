@@ -13,11 +13,13 @@ import {
   X,
   RefreshCw,
   Film,
+  MessageSquarePlus,
 } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { DictionaryService } from "@/api";
 import { ApiError } from "@/api/core/ApiError";
 import type { ExtendedWord, WordLookupResponse } from "@/types/vocabulary";
+import type { Definition } from "@/api/models/Definition";
 import { parseExamples } from "@/lib/vocabulary";
 import { MovieClipPlayer } from "@/components/dictionary/MovieClipPlayer";
 
@@ -25,6 +27,13 @@ type ClipWithMeta = {
   clip: Record<string, any>;
   meaning: string;
   partOfSpeech: string;
+};
+
+type ContextAnalysisResult = {
+  is_new_definition: boolean;
+  explanation: string;
+  matching_definition_id: number | null;
+  new_definition: Definition | null;
 };
 
 export default function Vocabulary() {
@@ -36,6 +45,8 @@ export default function Vocabulary() {
   const [userWordId, setUserWordId] = useState<number | null>(null);
   const [clips, setClips] = useState<ClipWithMeta[]>([]);
   const [clipsLoading, setClipsLoading] = useState(false);
+  const [contextInput, setContextInput] = useState("");
+  const [contextResult, setContextResult] = useState<ContextAnalysisResult | null>(null);
 
   const fetchClips = useCallback(async (word: ExtendedWord) => {
     setClipsLoading(true);
@@ -97,6 +108,8 @@ export default function Vocabulary() {
       setActiveWord(data);
       setSavedDefinitionIds(new Set(data.saved_definitions));
       setUserWordId(data.user_word_id);
+      setContextInput("");
+      setContextResult(null);
       fetchClips(data);
     },
   });
@@ -137,6 +150,18 @@ export default function Vocabulary() {
     onSuccess: (defId) => {
       setSavedDefinitionIds(prev => new Set([...prev, defId]));
       queryClient.invalidateQueries({ queryKey: ["saved-words"] });
+    },
+  });
+
+  const contextMutation = useMutation({
+    mutationFn: async ({ wordId, context }: { wordId: number; context: string }) => {
+      return await DictionaryService.dictionaryWordsAnalyzeContextCreate(wordId, { context }) as ContextAnalysisResult;
+    },
+    onSuccess: (result) => {
+      setContextResult(result);
+      if (result.is_new_definition && result.new_definition && activeWord) {
+        setActiveWord(prev => prev ? { ...prev, definitions: [...prev.definitions, result.new_definition as any] } : prev);
+      }
     },
   });
 
@@ -279,7 +304,7 @@ export default function Vocabulary() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <h1 className="text-3xl md:text-5xl font-bold text-gradient-gold break-words">{activeWord.term}</h1>
-                    <p className="text-xl text-muted-foreground font-serif italic">{activeWord.phonetic}</p>
+                    <p className="text-xl text-muted-foreground font-serif italic">{activeWord.pronunciation}</p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
@@ -377,6 +402,73 @@ export default function Vocabulary() {
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Analyze in Context */}
+              <div className="glass-card p-6 space-y-4">
+                <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <MessageSquarePlus className="w-5 h-5 text-primary" />
+                  Analyze in Context
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Found <span className="font-semibold text-foreground">{activeWord.term}</span> in a sentence and not sure which meaning applies? Paste the sentence below.
+                </p>
+                <textarea
+                  value={contextInput}
+                  onChange={(e) => { setContextInput(e.target.value); setContextResult(null); }}
+                  placeholder={`Paste a sentence containing "${activeWord.term}"…`}
+                  rows={3}
+                  className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/30 resize-none transition-all"
+                />
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="gold"
+                    size="sm"
+                    onClick={() => contextMutation.mutate({ wordId: activeWord.id, context: contextInput })}
+                    disabled={!contextInput.trim() || contextMutation.isPending}
+                  >
+                    {contextMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4" />
+                    )}
+                    Analyze
+                  </Button>
+                  {contextMutation.isError && (
+                    <p className="text-sm text-destructive">
+                      {(contextMutation.error as any)?.body?.error ?? "Analysis failed. Make sure the sentence contains the word."}
+                    </p>
+                  )}
+                </div>
+
+                {contextResult && (
+                  <div className="mt-2 space-y-3 animate-in fade-in">
+                    {contextResult.is_new_definition ? (
+                      <div className="p-4 rounded-xl border border-primary/30 bg-primary/5 space-y-2">
+                        <span className="text-xs font-bold uppercase tracking-widest text-primary">New definition found</span>
+                        {contextResult.new_definition && (
+                          <div>
+                            <p className="text-sm font-medium text-foreground">{contextResult.new_definition.translation}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{contextResult.new_definition.details}</p>
+                          </div>
+                        )}
+                        <p className="text-sm text-muted-foreground border-t border-border/40 pt-2">{contextResult.explanation}</p>
+                      </div>
+                    ) : (
+                      <div className="p-4 rounded-xl border border-border bg-muted/30 space-y-2">
+                        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Existing definition matches</span>
+                        {contextResult.matching_definition_id && (
+                          <p className="text-xs text-primary font-semibold">
+                            Definition #{activeWord.definitions.findIndex(d => d.id === contextResult.matching_definition_id) + 1}
+                            {" · "}
+                            {activeWord.definitions.find(d => d.id === contextResult.matching_definition_id)?.translation}
+                          </p>
+                        )}
+                        <p className="text-sm text-muted-foreground">{contextResult.explanation}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Nuanced Related Words */}

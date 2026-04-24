@@ -87,7 +87,7 @@ export default function SavedWords() {
                     <>
                         <div className="grid grid-cols-12 gap-4 p-5 bg-muted/30 border-b border-border text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                             <div className="col-span-5 md:col-span-4 pl-4">Word</div>
-                            <div className="col-span-4 hidden md:block border-l border-border/50 pl-4">Phonetic</div>
+                            <div className="col-span-4 hidden md:block border-l border-border/50 pl-4">Pronunciation</div>
                             <div className="col-span-4 md:col-span-2 border-l border-border/50 pl-4">Mastery</div>
                             <div className="col-span-3 md:col-span-2 text-right pr-4">Actions</div>
                         </div>
@@ -102,11 +102,11 @@ export default function SavedWords() {
                                 >
                                     <div className="col-span-5 md:col-span-4 pl-4">
                                         <div className="font-bold text-foreground text-lg group-hover:text-primary transition-colors">{userWord.word.term}</div>
-                                        <div className="text-xs text-muted-foreground font-serif italic">{userWord.word.phonetic}</div>
+                                        <div className="text-xs text-muted-foreground font-serif italic">{userWord.word.pronunciation}</div>
                                     </div>
 
                                     <div className="col-span-4 hidden md:block text-sm text-muted-foreground truncate pr-4 border-l border-border/10 pl-4">
-                                        {userWord.word.phonetic || "—"}
+                                        {userWord.word.pronunciation || "—"}
                                     </div>
 
                                     <div className="col-span-4 md:col-span-2 border-l border-border/10 pl-4">

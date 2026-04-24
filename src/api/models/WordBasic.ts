@@ -5,6 +5,6 @@
 export type WordBasic = {
     readonly id: number;
     term: string;
-    phonetic: string;
+    pronunciation: string;
 };
 

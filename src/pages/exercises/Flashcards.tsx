@@ -17,7 +17,7 @@ import { DictionaryService } from "@/api";
 interface ExerciseWord {
     id: string;
     term: string;
-    phonetic: string;
+    pronunciation: string;
     definitions: Array<{ text: string; example: string }>;
 }
 
@@ -35,7 +35,7 @@ export default function Flashcards() {
                     return {
                         id: String(uw.word.id),
                         term: uw.word.term,
-                        phonetic: uw.word.phonetic,
+                        pronunciation: uw.word.pronunciation,
                         definitions: [{ text: def.translation ?? "", example: def.example ?? "" }],
                     };
                 })
@@ -98,7 +98,7 @@ export default function Flashcards() {
                                 <div className="backface-hidden absolute w-full h-full glass-card border-primary/20 flex flex-col items-center justify-center p-8 shadow-2xl">
                                     <span className="text-primary/50 text-xs tracking-[0.2em] uppercase absolute top-10 font-bold">Term</span>
                                     <h2 className="text-6xl font-black text-gradient-gold mb-6">{currentWord?.term}</h2>
-                                    <p className="text-muted-foreground font-serif italic text-2xl">{currentWord?.phonetic}</p>
+                                    <p className="text-muted-foreground font-serif italic text-2xl">{currentWord?.pronunciation}</p>
                                     <div className="absolute bottom-10 text-muted-foreground flex items-center gap-3 text-sm animate-pulse bg-muted/50 px-4 py-2 rounded-full">
                                         <Rotate3d size={18} /> Click to flip
                                     </div>

@@ -31,7 +31,7 @@ export interface Definition {
 export interface Word {
     id: string;
     term: string;
-    phonetic: string;
+    pronunciation: string;
     definitions: Definition[];
     cinemaExamples: CinemaExample[];
     mastery: number; // 0-100

@@ -69,12 +69,12 @@ export function MovieClipPlayer({ clip, term, className }: Props) {
       className={cn("rounded-xl overflow-hidden border border-white/10 flex flex-col", className)}
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="relative">
+      <div className="relative aspect-video bg-black">
         <video
           ref={videoRef}
           src={clip.video_url}
           controls
-          className="w-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover"
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
           onEnded={() => setIsPlaying(false)}

@@ -51,7 +51,7 @@ export function RecentWords() {
               <div>
                 <p className="font-medium text-foreground">{item.word.term}</p>
                 <p className="text-xs text-muted-foreground">
-                  {item.word.phonetic}
+                  {item.word.pronunciation}
                 </p>
               </div>
             </div>

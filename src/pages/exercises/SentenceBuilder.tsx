@@ -20,7 +20,7 @@ import type { AnalysisResult } from "@/types/vocabulary";
 interface ExerciseWord {
     id: string;
     term: string;
-    phonetic: string;
+    pronunciation: string;
     definitions: Array<{ text: string }>;
 }
 
@@ -41,7 +41,7 @@ export default function SentenceBuilder() {
                     return {
                         id: String(uw.word.id),
                         term: uw.word.term,
-                        phonetic: uw.word.phonetic,
+                        pronunciation: uw.word.pronunciation,
                         definitions: [{ text: def.translation ?? "" }],
                     };
                 })
@@ -134,7 +134,7 @@ export default function SentenceBuilder() {
                         <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent pointer-events-none"></div>
                         <span className="text-secondary/50 text-xs tracking-[0.3em] uppercase mb-4 block font-black relative z-10">Your Target Word</span>
                         <h2 className="text-6xl font-black text-secondary mb-3 tracking-tighter relative z-10">{currentWord.term}</h2>
-                        <p className="text-muted-foreground font-serif italic text-2xl mb-6 relative z-10">{currentWord.phonetic}</p>
+                        <p className="text-muted-foreground font-serif italic text-2xl mb-6 relative z-10">{currentWord.pronunciation}</p>
                         <div className="inline-block bg-muted/50 backdrop-blur-sm px-6 py-2.5 rounded-xl text-sm font-medium text-foreground border border-border/50 relative z-10">
                             {currentWord.definitions?.[0]?.text}
                         </div>

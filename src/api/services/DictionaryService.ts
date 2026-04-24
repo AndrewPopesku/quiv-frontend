@@ -191,6 +191,31 @@ export class DictionaryService {
         });
     }
     /**
+     * @param wordId
+     * @param requestBody
+     * @returns ContextAnalysisResponse
+     * @throws ApiError
+     */
+    public static dictionaryWordsAnalyzeContextCreate(
+        wordId: number,
+        requestBody: { context: string },
+    ): CancelablePromise<{
+        is_new_definition: boolean;
+        explanation: string;
+        matching_definition_id: number | null;
+        new_definition: Definition | null;
+    }> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/dictionary/words/{id}/analyze-context/',
+            path: {
+                'id': wordId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * @param term Term to be looked up
      * @returns WordBasic
      * @throws ApiError

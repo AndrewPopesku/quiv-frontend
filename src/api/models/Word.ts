@@ -7,7 +7,7 @@ import type { NuancedRelatedWord } from './NuancedRelatedWord';
 export type Word = {
     readonly id: number;
     term: string;
-    phonetic: string;
+    pronunciation: string;
     definitions: Array<Definition>;
     nuances: Array<NuancedRelatedWord>;
 };

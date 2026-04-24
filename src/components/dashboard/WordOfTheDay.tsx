@@ -102,7 +102,7 @@ export function WordOfTheDay() {
           </div>
 
           <p className="text-muted-foreground text-lg mb-2">
-            {word.phonetic}
+            {word.pronunciation}
           </p>
 
           {firstDefinition && (

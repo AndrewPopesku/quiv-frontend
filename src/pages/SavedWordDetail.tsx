@@ -255,7 +255,7 @@ export default function SavedWordDetail() {
                     {userWord.word.term}
                   </h1>
                   <p className="text-xl text-muted-foreground font-serif italic">
-                    {userWord.word.phonetic}
+                    {userWord.word.pronunciation}
                   </p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
